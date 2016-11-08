@@ -1,62 +1,92 @@
-
 class RoomManager(object):
     """
     Each run has 6 key
     """
     
-    fragmentary_room = {}
     check_table = {}
     game_rooms = {}
+    room_level = {}
     index = 0
     current_counter = 0
     
     def __init__(self, size=4, num=100):
         """
-        @param size: The size of each room
+        @param size: The size of each room, 
         @param num: The number of room
         """
+        #: Because python index start with `0` so 
+        #: self.size = size -1
         self.size = size
-        self.hang_keys()
+        self.room_size = size + 1
+        self.fragmentary_room = { i:[]  for i in range(1, self.size + 1) }
+        self.available_level = xrange(self.size)
 
-
-    def hang_keys(self):
-        """
-        {   
-            1: ['room1', 'room5'],
-            2: ['room2', 'room3'],
-            3: ['room4', 'room6', 'room7'],
-            4: ['room8'],
-            5: [],
-        }
-        """
-        self.fragmentary_room = { i:[]  for i in range(self.size) }
-   
-    
     def has_fragmentary(self):
         """
-        Available keys
+        Fragmentary keys, Check if available!
+        You should check fragmentary_room before use new room!
         """
-        key_levels = [i for i in xrange(self.size)]
-        for key_level in key_levels:
+        for key_level in self.available_level:
             room_names = self.fragmentary_room.get(key_level)
             if room_names:
-                room_name = self.fragmentary_room.get(key_level).pop()
-                if key_level > 1:
-                    self.fragmentary_room(key - 1).push(room_name)
+                room_name = self.do_it(key_level)
                 return room_name
         return None
 
-    
+    def do_it(self, key_level):
+        """
+        Rotation the key_level
+        Example:
+           origin    ->> {1:['r1', 'r2', 'r3'], 2:['r4', 'r5'] ... }
+           rotation: ->> {1:['r1', 'r2', 'r3', 'r4'], 2:['r5'] ... }
+
+        """
+
+        if key_level == 1:
+            """
+            If the `key_level` is equal to `1`, that's mean
+            we should delete this member from self.fragmentary_room 
+            """
+            room_name = self.fragmentary_room.get(key_level).pop()
+        
+        
+        elif key_level > 1 and key_level <= self.size:
+            """
+            """
+            room_name = self.fragmentary_room.get(key_level).pop()
+            self.fragmentary_room[key_level - 1].append(room_name)
+        else:
+            raise KeyError("key level out of range")
+        
+        return room_name
+        
     def new_room_name(self, prefix='room', subfix=''):
+        """
+        @param prefix: default `room`, you can define it if you want!
+        @param subfix: default ``, a empty string!
+        @return : a string with a number which increment auto!
+        """
         index = self.index
         return '%s%s%s' % ( prefix, index, subfix)
 
     
-    def new_room(self, room_name, uid):
+    def new_room(self, uid):
+        """
+        @param room_name: a string type, 
+        Example:    'room1'
+        @param uid: a string or a number set!
+        Example: 12345
+        return : None
+        """
+        if self.game_rooms == {}:
+            self.index = 0
+            self.current_counter = 0
+
         if self.current_counter == 0:
             room_name = self.new_room_name()
             self.game_rooms[room_name] = [uid, ]
             self.current_counter = self.current_counter + 1
+
         elif self.current_counter <= self.size:
             room_name = self.new_room_name()
             self.game_rooms[room_name].append(uid)
@@ -81,73 +111,46 @@ class RoomManager(object):
             self.check_table[uid] = room_name
         else:
             # get new room
-            self.new_room(room_name, uid)
+            self.new_room(uid)
 
+    def rotation(self, room_name, key_level):
+        level = self.room_level.get(room_name, '')
+        if level:
+            self.fragmentary_room[level].remove(room_name)
+        self.fragmentary_room[key_level].append(room_name)
+        self.room_level[room_name] = key_level 
 
+        
+
+    def clean(self, room_name):
+        length = len(self.game_rooms[room_name])
+        if length == 0:
+            del self.game_rooms[room_name]
+        elif length == 5:
+            pass
+        else:
+            key_level = self.room_size - length
+            self.rotation(room_name, key_level)
+
+    
     def check_out(self, uid):
         try:
             room_name = self.check_table[uid]
         except Exception as ex:
             raise KeyError('check_table has no such key [%s]' % uid)
-
         try:
             self.game_rooms[room_name].remove(uid)
         except Exception as ex:
             raise KeyError('room [%s] have no found any memeber name as [%s]' % (room_name, uid))
 
-        residue = self.game_rooms[room_name]
-        # residue is room list! Example : ['room1', 'roomm2']
-
-        if len(residue) == 0:
-            #drop the room
-            room_level = self.size - len(residue) - 1
-            del self.game_rooms[room_name]
-            self.fragmentary_room[room_level].remove(room_name)
-        elif len(residue) > 0:
-            room_level = self.size - len(residue)
-            self.fragmentary_room[room_level].append(room_name)
-        else:
-            pass
-
+        self.clean(room_name)
+        
         del self.check_table[uid]
 
 
-
-if __name__ == '__main__':
-    manager = RoomManager()
-    manager.check_in(12344)
-    manager.check_in(12355)
-    manager.check_in(12366)
-    manager.check_in(12388)
-    manager.check_in(12399)
-    manager.check_in(12300)
-    print manager.game_rooms
-    # test check out
-    print '=' * 80
-    manager.check_out(12388)
-    print 'manager.check_out(12388)'
-    print manager.game_rooms
-    manager.check_in(12888)
-    print 'manager.check_in(12888)'
-    print manager.game_rooms
-
-    print 'manager.check_in(22299)'
-    manager.check_in(22299)
-    print manager.game_rooms
-    print 'manager.check_in(88800)'
-    manager.check_in(88800)
-    print manager.game_rooms
-    # retrieve room test
-    print '=' * 80
-    manager.check_out(12344)
-    manager.check_out(12355)
-    manager.check_out(12366)
-    manager.check_out(12399)
-    manager.check_out(12300)
-    print manager.game_rooms
-    # drop empty room test
-    print '=' * 80
-    print 'manager.check_out(12888)'
-    manager.check_out(12888)
-    print manager.game_rooms
-
+    def status(self):
+        print '-' * 80
+        print 'game_rooms:',self.game_rooms
+        print 'fragmentary:', self.fragmentary_room
+        print 'check_table',self.check_table
+        print '-' * 80
