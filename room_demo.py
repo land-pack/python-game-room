@@ -9,15 +9,15 @@ class RoomManager(object):
     index = 0
     current_counter = 0
     
-    def __init__(self, size=4, num=100):
+    def __init__(self, size=5, num=100):
         """
         @param size: The size of each room, 
         @param num: The number of room
         """
         #: Because python index start with `0` so 
         #: self.size = size -1
-        self.size = size
-        self.room_size = size + 1
+        self.size = size - 1
+        self.room_size = self.size + 1
         self.fragmentary_room = { i:[]  for i in range(1, self.size + 1) }
         self.available_level = xrange(self.size)
 
@@ -113,19 +113,23 @@ class RoomManager(object):
             # get new room
             self.new_room(uid)
 
+    
     def rotation(self, room_name, key_level):
         level = self.room_level.get(room_name, '')
         if level:
             self.fragmentary_room[level].remove(room_name)
         self.fragmentary_room[key_level].append(room_name)
         self.room_level[room_name] = key_level 
+        print 'key_level', key_level
 
-        
 
+    
     def clean(self, room_name):
         length = len(self.game_rooms[room_name])
         if length == 0:
             del self.game_rooms[room_name]
+            if room_name in self.room_level:
+                del self.room_level[room_name]
         elif length == 5:
             pass
         else:
@@ -142,15 +146,14 @@ class RoomManager(object):
             self.game_rooms[room_name].remove(uid)
         except Exception as ex:
             raise KeyError('room [%s] have no found any memeber name as [%s]' % (room_name, uid))
-
         self.clean(room_name)
-        
         del self.check_table[uid]
 
 
     def status(self):
         print '-' * 80
-        print 'game_rooms:',self.game_rooms
-        print 'fragmentary:', self.fragmentary_room
-        print 'check_table',self.check_table
+        print 'game_rooms:',    self.game_rooms
+        print 'fragmentary:',   self.fragmentary_room
+        print 'check_table',    self.check_table
+        print 'room_level',     self.room_level
         print '-' * 80
