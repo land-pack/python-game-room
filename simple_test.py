@@ -43,3 +43,14 @@ Describe:
 For now, we have achieve some part of above target!
 
 """
+manager.check_in(4)
+manager.status()
+
+manager.check_out(5)
+manager.status()
+
+manager.check_in(88)
+manager.status()
+
+manager.check_in(99)
+manager.status()

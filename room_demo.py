@@ -50,7 +50,7 @@ class RoomManager(object):
             room_name = self.fragmentary_room.get(key_level).pop()
         
         
-        elif key_level > 1 and key_level <= self.size:
+        elif key_level > 1 and key_level <= self.room_size:
             """
             """
             room_name = self.fragmentary_room.get(key_level).pop()
@@ -120,15 +120,15 @@ class RoomManager(object):
             self.fragmentary_room[level].remove(room_name)
         self.fragmentary_room[key_level].append(room_name)
         self.room_level[room_name] = key_level 
-        print 'key_level', key_level
-
 
     
     def clean(self, room_name):
         length = len(self.game_rooms[room_name])
         if length == 0:
             del self.game_rooms[room_name]
-            if room_name in self.room_level:
+            level = self.room_level.get(room_name, '')
+            if level:
+                self.fragmentary_room[level].remove(room_name)
                 del self.room_level[room_name]
         elif length == 5:
             pass
