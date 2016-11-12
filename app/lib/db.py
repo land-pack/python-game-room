@@ -97,11 +97,90 @@ class BaseMachineHashNodeManager(object):
                 ....reconnect..... 
             [Node123] -----> [127.0.0.1:90001]
         """
+        #key = self._connect_hash_machine[id(connect)]
+        #del self._machine_hash_connect[key]
         del self._connect_hash_machine[id(connect)]
 
 
 class NodeManager(BaseMachineHashNodeManager):
-    pass
+    _room_max_size = 4
+    _node_room = {}
+ 
+    def is_die(self, connect):
+        """
+        @param connect: the websocket fd
+        @return : True / False
+        """
+        if id(connect) in self._connect_hash_machine:
+            return False
+        else:
+            return True
+
+    
+    def is_full(self, node):
+        """
+        @param node: number!
+        @return : Boolean
+        """
+        rooms = self._node_hash_room[node]
+        if rooms > self._node_max_size:
+            return True
+        else:
+            return False
+
+    
+    def recovery(self, ):
+        pass
+
+
+    def in_node(self, node, rooms):
+        """
+        Example:
+            rooms = {
+                'room1': [ u1, u2, u3 ]
+                'room2': [ u4, u5, u6 ]
+            }
+        """
+        for room in rooms:
+            if len(room) > self._room_max_size:
+                pass
+            else:
+                pass
+
+
+    def sit_down(self, user):
+        """
+        Example:
+            self._node_hash_room
+            {
+                1: { 'room1': [u1,u2,u3,u4], 'room2':[...]},
+                2: { 'room5': [u1,u2,u3,u4], 'room6':[...]},
+                3: { 'room8': [u1,u2,u3,u4], 'room9':[...]}
+            }
+        """
+        for node in self._node_hash_room:
+            if node in self._machine_hash_connect:
+                # node connect okay!
+                rooms = self._node_hash_room[node]
+                if len(rooms) > self._node_max_size:
+                    # Current node fill out!
+                    pass
+                else:
+                    self.in_node(rooms, user)
+                    room = manager.check_in(user)
+                    self._node_hash_room[node].add(room)    # a set !!
+                    return #TODO ...
+            else:
+                # keep look next node
+                pass
+
+    
+    def stand_up(self, user, room, node):
+        _node = self._node_hash_room[node]
+        room_name = manager.check_out(user)
+        room = manager.game_rooms[room_name]
+        if len(room) == 0:
+            self._node_hash_room[node].remove(room)
 
 
 if __name__ == '__main__':
@@ -113,3 +192,6 @@ if __name__ == '__main__':
     mmt.unregister('connect2')
     mmt.register('connect2a', '127.0.0.1','9002')
     print mmt._node_hash_room
+    #print mmt.is_full()
+    #mmt.build_room()
+    #print mmt._node_room

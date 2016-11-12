@@ -6,16 +6,17 @@ from tornado import ioloop
 from tornado import websocket
 from tornado.options import options, define
 from lib.room import RoomManager
-from lib.core import make_response
-from lib.db import MachineManagerTable
+#from lib.core import make_response
+from lib.node import NodeManager
 
 
-define(name="port", default=9000, help="default port", type=int)
+define(name="port", default=8888, help="default port", type=int)
 manager = RoomManager()
-mmt = MachineManagerTable()
+mmt = NodeManager()
 
 clients = []
 delegate_clients = {}
+
 
 
 class JoinHandler(web.RequestHandler):
@@ -32,20 +33,20 @@ class JoinHandler(web.RequestHandler):
 
             [User] ---websocket ------>[Node] --------->[Area]
 
-        Example: 
-            response
-            {
-                "host": "127.0.0.1",
+        Example:
+        """
+        response={
+                "ip": "127.0.0.1",
                 "port": "9001",
                 "node": "2",
                 "room": "room1"
             }
-            data = ujson.dumps(response)
-        """
+        #data = ujson.dumps(response)
         
         user = self.get_argument("user")
-        data = mmt.dispatch(user)   #TODO ...
-        self.write(data)
+        #data = mmt.dispatch(user)   #TODO ...
+
+        self.write(ujson.dumps(response))
 
 
 class WebSocketHandler(websocket.WebSocketHandler):
@@ -56,7 +57,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
     def open(self):
         """
         Usage:
-            ws = websocket.WebSocketApp("ws://127.0.0.1:8880/ws?ip=%s&port=%s" % (ip, port)
+            ws = websocket.WebSocketApp("ws://127.0.0.1:8888/ws?ip=%s&port=%s" % (ip, port)
         Desc:
             [Node] ----------------> [Area] --------
                                                     ]
@@ -65,16 +66,27 @@ class WebSocketHandler(websocket.WebSocketHandler):
         ip = self.get_argument('ip')
         port = self.get_argument("port")
         mmt.register(self, ip, port)
+        print '%sregister%s' % ('*'*20,'*'*20)
+        print mmt._node_hash_room
+        print mmt._machine_hash_connect 
+        print mmt._machine_hash_node
+        print mmt._connect_hash_machine
         clients.append(self)
 
 
     def on_close(self):
         mmt.unregister(self)
+        print '%sunregister%s' % ('*'*20,'*'*20)
+        print mmt._machine_hash_connect 
+        print mmt._node_hash_room
+        print mmt._machine_hash_node
+        print mmt._connect_hash_machine
         clients.remove(self)
 
 
     def on_message(self, msg):
-        response = make_response(msg, manager)
+        #response = make_response(msg, manager)
+        response = msg
         self.write_message(response)
 
 
