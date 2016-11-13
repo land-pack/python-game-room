@@ -105,9 +105,11 @@ class WebSocketClient(object):
 
 
 class RTCWebSocketClient(WebSocketClient):
-    msg = {'type': 'msg', 'from': 'Frankie',
+    msg = {'command': 'msg', 'from': 'Frankie',
            'to': 'Peter', 'body': 'Hello, Peter'}
-    hb_msg = {'type': 'hb'}  # hearbeat
+    hb_msg = {'command': 'ping'}  # hearbeat
+
+    message = ''
 
     heartbeat_interval = 3
 
@@ -141,6 +143,7 @@ class RTCWebSocketClient(WebSocketClient):
     def on_message(self, msg):
         print'on_message msg=', msg
         self.last_active_time = time.time()
+        self.message = msg
 
     def on_connection_success(self):
         print('Connected!')
@@ -151,7 +154,6 @@ class RTCWebSocketClient(WebSocketClient):
     def on_connection_close(self, reason):
         print('Connection closed reason=%s' % (reason,))
         self.pending_hb and self._io_loop.remove_timeout(self.pending_hb)
-
         self.reconnect()
 
     def reconnect(self):

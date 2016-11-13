@@ -6,7 +6,7 @@ from tornado import ioloop
 from tornado import websocket
 from tornado.options import options, define
 from lib.room import RoomManager
-#from lib.core import make_response
+from lib.core import make_response
 from lib.node import NodeManager
 
 
@@ -15,7 +15,6 @@ manager = RoomManager()
 mmt = NodeManager()
 
 clients = []
-delegate_clients = {}
 
 
 
@@ -34,19 +33,16 @@ class JoinHandler(web.RequestHandler):
             [User] ---websocket ------>[Node] --------->[Area]
 
         Example:
-        """
         response={
                 "ip": "127.0.0.1",
                 "port": "9001",
                 "node": "2",
-                "room": "room1"
             }
-        #data = ujson.dumps(response)
+        """
         
         user = self.get_argument("user")
-        #data = mmt.dispatch(user)   #TODO ...
-
-        self.write(ujson.dumps(response))
+        data = mmt.add_user(user)
+        self.write(ujson.dumps(data))
 
 
 class WebSocketHandler(websocket.WebSocketHandler):
@@ -65,28 +61,20 @@ class WebSocketHandler(websocket.WebSocketHandler):
         """
         ip = self.get_argument('ip')
         port = self.get_argument("port")
-        mmt.register(self, ip, port)
-        print '%sregister%s' % ('*'*20,'*'*20)
-        print mmt._node_hash_room
-        print mmt._machine_hash_connect 
-        print mmt._machine_hash_node
-        print mmt._connect_hash_machine
+        node_id = mmt.register(self, ip, port)
         clients.append(self)
+        response = {"node":node_id}
+        self.write_message(ujson.dumps(response))
 
 
     def on_close(self):
         mmt.unregister(self)
-        print '%sunregister%s' % ('*'*20,'*'*20)
-        print mmt._machine_hash_connect 
-        print mmt._node_hash_room
-        print mmt._machine_hash_node
-        print mmt._connect_hash_machine
         clients.remove(self)
 
 
     def on_message(self, msg):
-        #response = make_response(msg, manager)
-        response = msg
+        print 'msg', msg
+        response = make_response(msg, mmt)
         self.write_message(response)
 
 
