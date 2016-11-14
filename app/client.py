@@ -43,7 +43,6 @@ if __name__ == "__main__":
     """
     data = response.content
     data = ujson.loads(data)
-    print '...',data
     if data == -1:
         print 'Currently no more node for use'
     else:

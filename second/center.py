@@ -14,6 +14,7 @@ define(name="port", default=8888, help="default port", type=int)
 mmt = NodeManager()
 manager = RoomManager()
 clients = []
+client_handler_hash_connect = {}
 
 
 
@@ -45,6 +46,15 @@ class JoinHandler(web.RequestHandler):
         response = mmt.install_room(room, user)
         if response == -1:
             manager.check_out(user)
+        #TODO let the delegate server know
+        # try ..except should be here ...
+        ip = response.get("ip")
+        port = response.get("port")
+        node = response.get("node")
+        machine = "%s-%s" % (ip, port)
+        client_handler = mmt._machine_hash_connect[machine]
+        connect = client_handler_hash_connect[client_handler]
+        connect.write_message(ujson.dumps({"user":user, "room":room, "node":node}))
         self.write(ujson.dumps(response))
 
 
@@ -66,6 +76,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
         port = self.get_argument("port")
         node_id = mmt.register(self, ip, port)
         clients.append(self)
+        client_handler_hash_connect[id(self)] = self
         response = {"node_id":node_id}
         self.write_message(ujson.dumps(response))
 
@@ -73,6 +84,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
     def on_close(self):
         mmt.unregister(self)
         clients.remove(self)
+        del client_handler_hash_connect[id(self)]
 
 
     def on_message(self, msg):

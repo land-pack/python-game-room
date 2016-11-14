@@ -1,7 +1,7 @@
 import time
 import functools
 import json
-
+import ujson
 from tornado import gen
 from tornado import httpclient
 from tornado import httputil
@@ -112,6 +112,8 @@ class RTCWebSocketClient(WebSocketClient):
     message = ''
 
     heartbeat_interval = 3
+    
+    node_id = 0
 
     def __init__(self, io_loop=None,
                  connect_timeout=DEFAULT_CONNECT_TIMEOUT,
@@ -141,9 +143,12 @@ class RTCWebSocketClient(WebSocketClient):
         self.last_active_time = time.time()
 
     def on_message(self, msg):
-        print'on_message msg=', msg
         self.last_active_time = time.time()
-        self.message = msg
+        data = ujson.loads(msg)
+        if 'node_id' in data:
+            self.node_id= data.get("node_id")
+        else:
+            pass
 
     def on_connection_success(self):
         print('Connected!')

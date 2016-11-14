@@ -148,7 +148,7 @@ class RTCWebSocketClient(WebSocketClient):
         if 'node_id' in data:
             self.node_id= data.get("node_id")
         else:
-            pass
+            print 'From Center>>>', msg
 
     def on_connection_success(self):
         print('Connected!')

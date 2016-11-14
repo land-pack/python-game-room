@@ -11,9 +11,7 @@ from lib.node import NodeManager
 
 
 define(name="port", default=8888, help="default port", type=int)
-manager = RoomManager()
 mmt = NodeManager()
-
 clients = []
 
 
@@ -63,7 +61,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
         port = self.get_argument("port")
         node_id = mmt.register(self, ip, port)
         clients.append(self)
-        response = {"node":node_id}
+        response = {"node_id":node_id}
         self.write_message(ujson.dumps(response))
 
 
@@ -73,7 +71,6 @@ class WebSocketHandler(websocket.WebSocketHandler):
 
 
     def on_message(self, msg):
-        print 'msg', msg
         response = make_response(msg, mmt)
         self.write_message(response)
 
