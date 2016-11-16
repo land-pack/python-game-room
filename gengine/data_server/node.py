@@ -166,6 +166,7 @@ class NodeManager(BaseMachineHashNodeManager):
         if room in self._room_hash_node:
             node = self._room_hash_node[room]
             ip, port = self._node_hash_machine[node].split('-')
+            self._user_hash_node[user]=node
             response = {"ip":ip, "port":port,
                         "node":node, "room":room}
             return response
@@ -174,12 +175,24 @@ class NodeManager(BaseMachineHashNodeManager):
         for node in self._node_hash_counter:
             if self._node_hash_counter[node] < self._node_max_size:
                 self._room_hash_node[room] = node
+                self._node_hash_room[node].append(room)
                 self._node_hash_counter[node] = self._node_hash_counter[node]+1
                 ip, port = self._node_hash_machine[node].split('-')
+                self._user_hash_node[user]=node
                 response = {"ip":ip, "port":port,
                         "node":node, "room":room}
                 return response 
         return -1
+
+    def status(self):
+        print '+' * 50
+        print"_machine_hash_connect", self._machine_hash_connect
+        print"_connect_hash_machine", self._connect_hash_machine
+        print"_machine_hash_node", self._machine_hash_node
+        print"_node_hash_room", self._node_hash_room
+        print"_room_hash_node",  self._room_hash_node
+        print"_node_hash_counter", self._node_hash_counter 
+        print '+' * 50
 
 
 

@@ -14,7 +14,7 @@ class DispatchCommand(object):
         return _route
 
     
-    def dispatch(self, handler, message):
+    def dispatch(self, handler, message ):
         data = ujson.loads(message)
         command = data.get("command")
         if command in self._command_hash_views:

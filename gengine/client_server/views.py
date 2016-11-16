@@ -28,6 +28,7 @@ def close(handler, request):
 def ack_check_in(handler, request):
     status = request.get("status")
     if status == "ok":
+        # check in user local
         pass
     else:
         #TODO let the client know ~~~
@@ -37,7 +38,8 @@ def ack_check_in(handler, request):
 def ack_check_out(handler, request):
     status = request.get("status")
     if status == "ok":
+        #TODO do some clean job on local
         pass
     else:
-        #TODO let the client know ~~~
+        #TODO Don't need to let the client know ~~~
         pass

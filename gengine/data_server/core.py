@@ -16,7 +16,7 @@ class DispatchCommand(object):
    
     def render(self, message, mmt, manager=None):
         data = ujson.loads(message)
-        print '>>>>>>>>>>>>', data
+        #print '>>>>>>>>>>>>', data
         command = data.get("command")
         if command in self._command_hash_views:
             data = self._command_hash_views[command](data, mmt, manager)

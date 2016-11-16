@@ -20,7 +20,7 @@ from data_server.views import dc
 
 define(name="port", default=8888, help="default port", type=int)
 mmt = NodeManager()
-manager = RoomManager()
+manager = RoomManager(prefix='r_')
 clients = []
 client_handler_hash_connect = {}
 
@@ -66,6 +66,13 @@ class JoinHandler(web.RequestHandler):
         self.write(ujson.dumps(response))
 
 
+class MonitorHandler(web.RequestHandler):
+    def get(self):
+        mmt.status()
+        manager.status()
+        self.write("ok")
+
+
 class WebSocketHandler(websocket.WebSocketHandler):
     def check_origin(self, origin):
         return True
@@ -100,7 +107,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
 
 
     def on_message(self, msg):
-        response = dc.render(msg, mmt)
+        response = dc.render(msg, mmt, manager=manager)
         if response:
             self.write_message(response)
 
@@ -111,6 +118,7 @@ if __name__ == '__main__':
     application = web.Application([
 	    (r'/ws', WebSocketHandler),
 	    (r'/api/join', JoinHandler),
+            (r'/monitor', MonitorHandler)
 	],
     debug=True)
     print 'Listen on ', options.port

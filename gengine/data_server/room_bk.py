@@ -56,7 +56,7 @@ class _BaseRoomManager(object):
     """
     _user_counter = 0
     
-    def __init__(self, size=5, num=100, prefix=''):
+    def __init__(self, size=5, rooms=5, prefix=''):
         """
         @param size: The size of each room, 
         @param num: The number of room
@@ -66,23 +66,28 @@ class _BaseRoomManager(object):
         self.size = size - 1
         self.room_size = self.size + 1
         self._lack_level_hash_room_set = { i:[]  for i in range(1, self.size + 2) }
-        self.available_level = xrange(self.size + 2)
+        self._lack_level_set = xrange(size + 1)
+        self._max_lack_level = size
         self.prefix = prefix
+        self.rooms = rooms
+        #self._room_hash_user_set = { self.prefix+str(i):[] for i in range(0, self.rooms) }
 
 
-    def has_fragmentary(self):
+
+    def get_fragmentary(self):
         """
         Fragmentary keys, Check if available!
         You should check _lack_level_hash_room_set before use new room!
         """
-        for key_level in self.available_level:
-            room_names = self._lack_level_hash_room_set.get(key_level)
-            if room_names:
-                room_name = self.do_it(key_level)
+        for _lack_level in self._lack_level_set:
+            _room_set = self._lack_level_hash_room_set.get(_lack_level)
+            if _room_set:
+                room_name = self.do_it(_lack_level)
                 return room_name
         return None
 
-    def do_it(self, key_level):
+
+    def do_it(self, _lack_level):
         """
         Rotation the key_level
         Example:
@@ -91,25 +96,29 @@ class _BaseRoomManager(object):
 
         """
 
-        if key_level == 1:
+        if _lack_level == 1:
             """
-            If the `key_level` is equal to `1`, that's mean
-            we should delete this member from self._lack_level_hash_room_set 
+            If the `_lack_level` is equal to `1`, and then after pop out
+            it's should be use for some one! so we can use `pop` to return it
+            & delete it from self._lack_level_hash_room_set 
             """
-            room_name = self._lack_level_hash_room_set.get(key_level).pop()
+            room_name = self._lack_level_hash_room_set.get(_lack_level).pop()
+            del self._room_hash_lack_level[room_name]
         
         
-        elif key_level > 1 and key_level <= self.room_size:
+        elif _lack_level > 1 and _lack_level <= self._max_lack_level:
             """
+            if this `_lack_level` range between 1 to self._max_lack_level
+            we can do some rotation, after return it!
             """
-            room_name = self._lack_level_hash_room_set.get(key_level).pop()
-            self._lack_level_hash_room_set[key_level - 1].append(room_name)
+            room_name = self._lack_level_hash_room_set.get(_lack_level).pop()
+            self._lack_level_hash_room_set[_lack_level - 1].append(room_name)
         else:
             raise KeyError("key level out of range")
-        
         return room_name
         
-    def new_room_name(self, subfix=''):
+
+    def generate_room_name(self, subfix=''):
         """
         @param prefix: default `room`, you can define it if you want!
         @param subfix: default ``, a empty string!
@@ -128,34 +137,35 @@ class _BaseRoomManager(object):
         Example: 12345
         return : None
         """
-        print '_user_counter', self._user_counter
         if self._room_hash_user_set == {}:
             self._room_counter = 0
             self._user_counter = 0
 
         if self._user_counter == 0:
-            room_name = self.new_room_name()
+            room_name = self.generate_room_name()
             self._room_hash_user_set[room_name] = [uid, ]
             self._user_counter = self._user_counter + 1
 
         elif self._user_counter <= self.size:
-            room_name = self.new_room_name()
+            room_name = self.generate_room_name()
             self._room_hash_user_set[room_name].append(uid)
             self._user_counter = self._user_counter + 1
         else:
             self._user_counter = 0
             self._room_counter = self._room_counter + 1
-            room_name = self.new_room_name()
+            room_name = self.generate_room_name()
             self._room_hash_user_set[room_name] = [uid, ]
             self._user_counter = self._user_counter + 1
 
         self._user_hash_room[uid] = room_name
 
+    
     def check_in(self, uid):
         """
         @param uid: user id
+        @return : room id 
         """
-        room_name = self.has_fragmentary()
+        room_name = self.get_fragmentary()
         if room_name:
             # fill out fragmentary room!
             self._room_hash_user_set[room_name].append(uid)
@@ -167,26 +177,39 @@ class _BaseRoomManager(object):
         return self._user_hash_room[uid]
 
     
-    def rotation(self, room_name, key_level):
-        level = self._room_hash_lack_level.get(room_name, '')
-        if level:
-            self._lack_level_hash_room_set[level].remove(room_name)
-        self._lack_level_hash_room_set[key_level].append(room_name)
-        self._room_hash_lack_level[room_name] = key_level 
+    def rotation(self, room_name, new_level):
+        """
+        Usage:
+        Example:
+            self._room_hash_lack_level = {
+                    'room_0': 1,
+                    'room_1': 2,
+                }
+        """
+        old_level = self._room_hash_lack_level.get(room_name, None)
+        if old_level:
+            # if you do with `r3` and then , `r3` --> 1 level
+            # { 1: [r1, r2, r3], 2: [r4] }
+            print 'check ...old level', self._lack_level_hash_room_set
+            self._lack_level_hash_room_set[old_level].remove(room_name)
+            # { 1: [r1, r2], 2: [r3, r4] }
+            print '////',new_level
+            self._lack_level_hash_room_set[new_level].append(room_name)
+            print 'can i pass'
+            # {'r1':1, 'r2':1, 'r3':2, 'r4':2}
+            self._room_hash_lack_level[room_name] = new_level
+        else:
+            self._room_hash_lack_level[room_name] = new_level 
+            self._lack_level_hash_room_set[new_level].append(room_name)
 
     
+
     def clean(self, room_name):
         length = len(self._room_hash_user_set[room_name])
         if length == 0:
-            del self._room_hash_user_set[room_name]
-            level = self._room_hash_lack_level.get(room_name, '')
-           # if level:
-           #     self._lack_level_hash_room_set[level].remove(room_name)
-           #     del self._room_hash_lack_level[room_name]
-        elif length == self.room_size:
-            pass
+            key_level = self.room_size
+            self.rotation(room_name, key_level)
         else:
-            print 'length ...', length
             key_level = self.room_size - length
             self.rotation(room_name, key_level)
 
@@ -202,30 +225,75 @@ class _BaseRoomManager(object):
             raise KeyError('room [%s] have no found any memeber name as [%s]' % (room_name, uid))
         self.clean(room_name)
         del self._user_hash_room[uid]
+        #self._room_hash_user_set[room_name].remove(uid)
         return room_name
 
 
+class RoomManager(_BaseRoomManager):
+
     def status(self):
-        print '-' * 80
+        print '+' * 50
         print '_room_hash_user_set:',    self._room_hash_user_set
         print 'fragmentary:',   self._lack_level_hash_room_set
         print '_user_hash_room',    self._user_hash_room
         print '_room_hash_lack_level',     self._room_hash_lack_level
-        print '-' * 80
+        print '+' * 50 
 
 if __name__ == '__main__':
+    print "manager = RoomManager(size=3, prefix='room_')"
     manager = RoomManager(size=3, prefix='room_')
+    print "manager.check_in(12)"
     manager.check_in(12)
+    manager.status()
+    print '='*50
+    manager.check_out(12)
+    manager.status()
+    print '='*50
+    print "manager.check_in(12)"
+    manager.check_in(12)
+    print "manager.check_in(13)"
     manager.check_in(13)
-    manager.check_in(14)
-    manager.check_in(15)
-    manager.check_in(16)
     manager.status()
-    manager.check_out(16)
+    print '='*50
+    print "manager.check_out(12)"
+    manager.check_out(12)
     manager.status()
-    manager.check_out(15)
+    print '='*50
+    print "manager.check_out(13)"
+    manager.check_out(13)
     manager.status()
-    manager.check_in(161)
-    manager.check_in(162)
-    manager.check_in(163)
+    print '='*50
+    for i in range(10):
+        print "manager.check_in(i)"
+        manager.check_in(i)
     manager.status()
+    
+
+    
+    
+
+#    manager.check_in(13)
+#    manager.check_in(14)
+#    manager.check_in(15)
+#    manager.check_in(16)
+#    manager.status()
+#    manager.check_in(166)
+#    manager.status()
+#    manager.check_out(16)
+#    manager.status()
+#    manager.check_out(15)
+#    manager.status()
+#    manager.check_in(161)
+#    manager.check_in(162)
+#    manager.check_in(163)
+#    #for i in range(200, 300):
+#    #    manager.check_in(i)
+#    manager.status()
+#    manager.check_out(12)
+#    manager.status()
+#    manager.check_in(1222)
+#    manager.status()
+#    manager.check_out(163)
+#    manager.status()
+#    manager.check_in(1999)
+#    manager.status()

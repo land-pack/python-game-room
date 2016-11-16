@@ -92,6 +92,7 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
         #        "uid":g_connect_hash_uid[id(self)]
         #    }
 
+        print ' send client close notify  to server'
         websocket_client.send(response)
 
 
