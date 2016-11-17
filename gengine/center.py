@@ -67,6 +67,40 @@ class JoinHandler(web.RequestHandler):
         self.write(ujson.dumps(response))
 
 
+class DashHandler(web.RequestHandler):
+    def get(self):
+        """
+        manager.node.room.user,
+        """
+        output = ''
+        lines = []
+        tag = "id,value"
+        lines.append(tag)
+        root = "Manager"
+        lines.append(root)
+        for node in mmt._node_hash_room:
+            rooms = mmt._node_hash_room[node]
+            root2 = 'Manager.node_%s' % node
+            lines.append(root2)
+            for room in rooms:
+                root3 = 'Manager.node_%s.room_%s' % (node, room)
+                lines.append(root3)
+                uids = manager._room_hash_user_set[room]
+                for uid in uids:
+                    output='Manager.node_%s.room_%s.uid_%s' % (node, room, uid)
+                    lines.append(output)
+        with open("./templates/data.csv", "w+") as fd:
+            for line in lines:
+                fd.write(line)
+                fd.write("\n")
+
+        self.render("dash.html")
+
+
+class CSVHandler(web.RequestHandler):
+    def get(self):
+        self.render("data.csv")
+
 class MonitorHandler(web.RequestHandler):
     def get(self):
         mmt.status()
@@ -119,9 +153,13 @@ if __name__ == '__main__':
     application = web.Application([
 	    (r'/ws', WebSocketHandler),
 	    (r'/api/join', JoinHandler),
-            (r'/monitor', MonitorHandler)
+            (r'/monitor', MonitorHandler),
+            (r'/dash', DashHandler),
+            (r'/data.csv', CSVHandler),
 	],
-    debug=True)
+    debug=True,
+    template_path=os.path.join(os.path.dirname(__name__),'templates'))
+
     print 'Listen on ', options.port
     application.listen(options.port)
     ioloop.IOLoop.instance().start()
