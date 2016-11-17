@@ -55,6 +55,9 @@ class BaseMachineHashNodeManager(object):
     _machine_hash_connect = {}
     """
     @property _node_hash_counter
+    The counter of room in the node!
+    After a new room append to this node
+    this property will auto increment!
     Example:
             { 0 : 64 }
             { 1 : 64 }
@@ -71,8 +74,9 @@ class BaseMachineHashNodeManager(object):
     _node_index = 0
 
 
-    def __init__(self, node_max_size=2):
-        self._node_max_size = node_max_size 
+    def __init__(self, rooms=2, users=32):
+        self._node_max_size = rooms
+        self._node_max_user_number = users
 
 
     def register(self, connect, ip, port):
@@ -103,7 +107,8 @@ class BaseMachineHashNodeManager(object):
             self._connect_hash_machine[id(connect)] = key
             self._machine_hash_connect[key] = id(connect)
             self._node_hash_machine[self._node_index]=key
-            self._node_hash_counter[self._node_index]= 0
+            self._node_hash_counter[self._node_index]= 0    # 0 room number!
+            self._node_hash_user[self._node_index]= 0    # 0 user number!
             self._node_index = self._node_index + 1
             return node_id
     
@@ -145,9 +150,43 @@ class NodeManager(BaseMachineHashNodeManager):
             }
     """
     _room_hash_node = {}
+    """
+    @property _node_hash_user
+    Example:
+            { 0 : 32 }
+            { 1 : 9  }
+            { 2 : 2  }
+    """
+    _node_hash_user = {}
 
 
-    def install_room(self, room, user):
+    def is_running(self, node):
+        """
+        @param node: node id
+        @return: Boolean, true if the node running okay!
+        else false return !
+        """
+        if node in self._node_hash_machine:
+            machine = self._node_hash_machine[node]
+            if machine in self._machine_hash_connect:
+                return True
+        return False
+
+
+    def is_user_fillout_node(self, node):
+        """
+        @param node: node id
+        @return : Boolean, true if the node has seat available
+        else return False!
+        """
+        current_user_number = self._node_hash_user.get(node, 0)
+        if current_user_number < self._node_max_user_number:
+            return False
+        else:
+            return True
+
+
+    def landing(self, room, user):
         """
         @param room: room id
         @param user: user id
@@ -164,26 +203,39 @@ class NodeManager(BaseMachineHashNodeManager):
         """
 
         if room in self._room_hash_node:
+            """
+            if the target room has been install on some one node
+            just search that node, return it!
+            """
             node = self._room_hash_node[room]
             ip, port = self._node_hash_machine[node].split('-')
             self._user_hash_node[user]=node
+            self._node_hash_user[node] = self._node_hash_user[node] + 1
             response = {"ip":ip, "port":port,
                         "node":node, "room":room}
             return response
 
-        print 'node is >>>>>>>>>>>>',self._node_hash_counter
         for node in self._node_hash_counter:
-            if self._node_hash_counter[node] < self._node_max_size:
+            if self.is_user_fillout_node(node):
+                return -1
+            else:
+
                 self._room_hash_node[room] = node
                 self._node_hash_room[node].append(room)
                 self._node_hash_counter[node] = self._node_hash_counter[node]+1
+                self._node_hash_user[node] = self._node_hash_user[node] + 1
                 ip, port = self._node_hash_machine[node].split('-')
                 self._user_hash_node[user]=node
                 response = {"ip":ip, "port":port,
                         "node":node, "room":room}
                 return response 
-        return -1
 
+
+    def flying(self, uid):
+        node = self._user_hash_node[uid]
+        self._node_hash_user[node] = self._node_hash_user[node] - 1
+
+    
     def status(self):
         print '+' * 50
         print"_machine_hash_connect", self._machine_hash_connect
@@ -192,6 +244,7 @@ class NodeManager(BaseMachineHashNodeManager):
         print"_node_hash_room", self._node_hash_room
         print"_room_hash_node",  self._room_hash_node
         print"_node_hash_counter", self._node_hash_counter 
+        print"_node_hash_user", self._node_hash_user
         print '+' * 50
 
 

@@ -8,4 +8,3 @@ six==1.10.0
 tornado==4.3
 ujson==1.35
 websocket-client==0.37.0
-wheel==0.24.0

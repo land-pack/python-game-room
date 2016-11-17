@@ -165,6 +165,11 @@ class _BaseRoomManager(object):
     
 
     def clean(self, room_name):
+        """
+        @param room_name: room id
+        @return : None
+        After a user out, the system will clean some trash of the user!
+        """
         if room_name in self._room_hash_lack_level:
             old_level = self._room_hash_lack_level[room_name]
             self._lack_level_hash_room_set[old_level].remove(room_name)
@@ -217,7 +222,6 @@ class RoomManager(_BaseRoomManager):
     def status(self):
         print '+' * 50
         print '_room_hash_user_set:',    self._room_hash_user_set
-        print 'fragmentary:',   self._lack_level_hash_room_set
         print '_user_hash_room',    self._user_hash_room
         print '_room_hash_lack_level',     self._room_hash_lack_level
         print '_lack_level_hash_room_set', self._lack_level_hash_room_set

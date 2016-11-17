@@ -28,10 +28,9 @@ def check_in(message, mmt, manager):
 @dc.route("check_out")
 def check_out(message, mmt, manager):
     uid = message.get("uid")
-    print 'check_out', message
     if uid in  mmt._user_hash_node:
         manager.check_out(uid)
-        #TODO update user counter
+        mmt.flying(uid) #update _node_hash_user counter
         return {"command":"ack_check_out", "status": "ok"}
     else:
         return {"command":"ack_check_out", "status": "bad"}

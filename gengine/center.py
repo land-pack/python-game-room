@@ -51,8 +51,9 @@ class JoinHandler(web.RequestHandler):
         
         uid = self.get_argument("uid")
         room = manager.check_in(uid)
-        response = mmt.install_room(room, uid)
+        response = mmt.landing(room, uid)
         if response == -1:
+            # rollback ...
             manager.check_out(uid)
         #TODO let the delegate server know
         # try ..except should be here ...
