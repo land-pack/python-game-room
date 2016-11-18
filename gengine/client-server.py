@@ -1,12 +1,12 @@
 import socket
 import ujson
-from client_server.websocket import RTCWebSocketClient
 from tornado import ioloop
 from tornado import websocket
 from tornado import web
 from tornado.options import options, define
 from client_server.views import dc # to trigger the DispatchCommand 
 from client_server.chat import tm
+from client_server.main import run
 from client_server.local import LocalManager 
 from client_server.chat import TalkManager
 
@@ -14,22 +14,17 @@ define(name="port", default=9001, help="default port", type=int)
 define(name="cport", default=8888, help="default port", type=int)
 
 
+io_loop, websocket_client = run(port=options.port, dc=dc)
 
 g_client_connect = []
 g_connect_hash_uid = {}
 
 
-io_loop = ioloop.IOLoop.instance()
-token = RTCWebSocketClient(io_loop)
+
 options.parse_command_line()
 
 
-host=socket.gethostname()
-ip=socket.gethostbyname(host)
-cport = options.cport
-ws_url = 'ws://127.0.0.1:%s/ws?ip=%s&port=%s' % (cport, ip, options.port)
-websocket_client = RTCWebSocketClient()
-websocket_client.connect(ws_url, dispatch=dc.dispatch, auto_reconnet=True, reconnet_interval=10)
+
 
 
 lm = LocalManager()
@@ -117,11 +112,7 @@ def main():
     application.listen(options.port)
 
 
-    try:
-        io_loop.start()
-    except KeyboardInterrupt:
-        websocket_client.close()
-
+    io_loop.start()
 
 if __name__ == '__main__':
     main()

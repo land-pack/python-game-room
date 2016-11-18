@@ -48,6 +48,6 @@ def main():
 if __name__ == '__main__':
     import threading
     import time
-    for i in xrange(10):
+    for i in xrange(20):
         threading.Thread(target=dispatch, args=(), name='thread-' + str(i)).start()
-        time.sleep(2)
+        time.sleep(1)

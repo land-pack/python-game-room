@@ -1,5 +1,6 @@
 import os
 import json
+import datetime
 import ujson
 from tornado import web
 from tornado import ioloop
@@ -11,6 +12,7 @@ from tornado.options import options, define
 #from lib.node import NodeManager
 from data_server.room import RoomManager
 from data_server.node import NodeManager
+from data_server.utils import set_expire, is_expire
 from data_server.views import dc
 
 #dcommand = DispatchCommand()
@@ -20,7 +22,7 @@ from data_server.views import dc
 
 define(name="port", default=8888, help="default port", type=int)
 mmt = NodeManager()
-manager = RoomManager(prefix='r_')
+manager = RoomManager(prefix='')
 clients = []
 client_handler_hash_connect = {}
 
@@ -64,6 +66,7 @@ class JoinHandler(web.RequestHandler):
         client_handler = mmt._machine_hash_connect[machine]
         connect = client_handler_hash_connect[client_handler]
         connect.write_message(ujson.dumps({"uid":uid, "room":room, "node":node}))
+        set_expire(uid)
         self.write(ujson.dumps(response))
 
 
@@ -100,6 +103,7 @@ class DashHandler(web.RequestHandler):
 class CSVHandler(web.RequestHandler):
     def get(self):
         self.render("data.csv")
+
 
 class MonitorHandler(web.RequestHandler):
     def get(self):
@@ -146,6 +150,18 @@ class WebSocketHandler(websocket.WebSocketHandler):
         if response:
             self.write_message(response)
 
+def check_expire():
+    remove_list = []
+    for uid in manager._user_pending_status_set:
+        if is_expire(uid):
+            print 'uid >>expire ',uid
+            manager.check_out(uid)
+            remove_list.append(uid)
+
+    for uid in remove_list:
+        remove_list.remove(uid)
+        manager._user_pending_status_set.remove(uid)
+
 
 if __name__ == '__main__':
     #import data_server.views
@@ -162,4 +178,5 @@ if __name__ == '__main__':
 
     print 'Listen on ', options.port
     application.listen(options.port)
+    ioloop.PeriodicCallback(check_expire, 1000).start()
     ioloop.IOLoop.instance().start()

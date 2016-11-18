@@ -44,6 +44,19 @@ class _BaseRoomManager(object):
     """
     _lack_level_hash_room_set = {}
     """
+    @property _user_pending_status_set
+    Usage: Only when the user has already connect to
+    the WebSocket Server,and then that user will remove
+    from this set!
+    Example:
+            {
+                u1: 1,
+                u1: ,
+                u1: 0,
+            }
+    """
+    _user_pending_status_set = set()
+    """
     @property _room_counter
     Usage:  
     Example:    2
@@ -192,13 +205,13 @@ class _BaseRoomManager(object):
         room_name = self.get_fragmentary()
         if room_name:
             # fill out fragmentary room!
-            print 'room_name', room_name 
             self._room_hash_user_set[room_name].append(uid)
             self._user_hash_room[uid] = room_name
             self._user_counter = self._user_counter + 1
         else:
             # get new room
             self.new_room(uid)
+        self._user_pending_status_set.add(uid)
         return self._user_hash_room[uid]
     
     

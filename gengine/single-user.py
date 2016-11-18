@@ -11,7 +11,7 @@ def dispatch(*args):
 
 def main():
     uid = raw_input("Please input your uid:")
-    response = requests.get('http://127.0.0.1:8888/api/join?uid=%s' % uid)
+    response = requests.get('http://127.0.0.1:8888/vroom/join?uid=%s' % uid)
     """
     {
         "ip":"127.0.0.1",

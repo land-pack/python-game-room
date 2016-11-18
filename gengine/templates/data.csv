@@ -1,29 +1,18 @@
 id,value
 Manager
 Manager.node_0
-Manager.node_0.room_r_0
-Manager.node_0.room_r_0.uid_Wayne Day
-Manager.node_0.room_r_0.uid_Brenda Robertson
-Manager.node_0.room_r_0.uid_Ruth Torres
-Manager.node_0.room_r_1
-Manager.node_0.room_r_1.uid_Linda Harrison
-Manager.node_0.room_r_1.uid_Sharon Kelly
-Manager.node_0.room_r_1.uid_Kimberly Hunter
-Manager.node_0.room_r_2
-Manager.node_0.room_r_2.uid_Jason Garza
-Manager.node_0.room_r_2.uid_Laura Stewart
-Manager.node_0.room_r_2.uid_Amanda Marshall
-Manager.node_0.room_r_3
-Manager.node_0.room_r_3.uid_Cheryl Lee
-Manager.node_0.room_r_3.uid_Anna Morrison
-Manager.node_0.room_r_3.uid_Joan Watkins
-Manager.node_0.room_r_4
-Manager.node_0.room_r_4.uid_Helen Mitchell
-Manager.node_0.room_r_4.uid_Rachel Stephens
-Manager.node_0.room_r_4.uid_Denise West
-Manager.node_0.room_r_5
-Manager.node_0.room_r_5.uid_Anne Gray
-Manager.node_0.room_r_5.uid_Jose Parker
-Manager.node_0.room_r_5.uid_Antonio Roberts
-Manager.node_0.room_r_6
-Manager.node_0.room_r_6.uid_Helen Hayes
+Manager.node_0.room_0
+Manager.node_0.room_0.uid_Peter Thompson
+Manager.node_0.room_0.uid_Gloria Sanders
+Manager.node_0.room_0.uid_Betty Ryan
+Manager.node_0.room_1
+Manager.node_0.room_1.uid_Sandra Sullivan
+Manager.node_0.room_1.uid_Sandra Gonzales
+Manager.node_0.room_1.uid_Shirley Nichols
+Manager.node_0.room_2
+Manager.node_0.room_2.uid_Tina Myers
+Manager.node_0.room_2.uid_Betty Edwards
+Manager.node_0.room_2.uid_Dorothy Stewart
+Manager.node_0.room_3
+Manager.node_0.room_3.uid_Paula Tucker
+Manager.node_0.room_3.uid_Jane Ramirez
