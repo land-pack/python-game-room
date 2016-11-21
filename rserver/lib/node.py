@@ -1,6 +1,3 @@
-from room import RoomManager 
-
-
 class BaseMachineHashNodeManager(object):
     """
     @property _machine_hash_node
@@ -262,8 +259,3 @@ if __name__ == '__main__':
     mmt.unregister('connect2')
     mmt.register('connect2a', '127.0.0.1','9002')
     print mmt._node_hash_room
-    # --------------------
-    manager = RoomManager()
-    room = manager.check_in("u1")
-    response = mmt.install_room(room, "u1")
-    print response 

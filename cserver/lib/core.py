@@ -1,5 +1,16 @@
 import ujson
 
+class ConnectMode(object):
+    _mode_choice = ['normally', 'recovery']
+    def __init__(self):
+        self.index = 0
+    
+    @property
+    def mode(self):
+        ret = self._mode_choice[self.index]
+        self.index = 1
+        return ret
+
 
 class DispatchCommand(object):
     

@@ -1,20 +1,32 @@
 import socket
+import os
 import ujson
+import logging
+import logging.config
+
 from tornado import ioloop
 from tornado import websocket
 from tornado import web
 from tornado.options import options, define
-from client_server.views import dc # to trigger the DispatchCommand 
-from client_server.chat import tm
-from client_server.main import run
-from client_server.local import LocalManager 
-from client_server.chat import TalkManager
+from lib.views import dc # to trigger the DispatchCommand 
+from lib.chat import tm
+from lib.main import run
+from lib.local import LocalManager 
+from lib.chat import TalkManager
+from lib.core import ConnectMode 
+import lib.color
+
+
+
+logging.config.fileConfig("log.conf")
+logger = logging.getLogger("cserver")
 
 define(name="port", default=9001, help="default port", type=int)
 define(name="cport", default=8888, help="default port", type=int)
 
-
-io_loop, websocket_client = run(port=options.port, dc=dc)
+cm = ConnectMode()
+mode = cm.mode
+io_loop, websocket_client = run(port=options.port, dc=dc, mode=mode)
 
 g_client_connect = []
 g_connect_hash_uid = {}

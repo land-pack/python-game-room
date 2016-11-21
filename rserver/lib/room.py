@@ -93,7 +93,6 @@ class _BaseRoomManager(object):
         for _lack_level in self._lack_level_set:
             _room_set = self._lack_level_hash_room_set.get(_lack_level)
             if _room_set:
-                print 'see me ...'
                 room_name = self.select_room_name(_lack_level)
                 return room_name
         return None

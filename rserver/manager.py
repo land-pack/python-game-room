@@ -1,31 +1,28 @@
 import os
 import json
 import datetime
+import logging
+import logging.config
+import lib.color
 import ujson
 from tornado import web
 from tornado import ioloop
 from tornado import websocket
 from tornado.options import options, define
+from lib.room import RoomManager
+from lib.node import NodeManager
+from lib.utils import set_expire, is_expire
+from lib.views import dc
 
-#from lib.room import RoomManager
-#from lib.core import DispatchCommand
-#from lib.node import NodeManager
-from data_server.room import RoomManager
-from data_server.node import NodeManager
-from data_server.utils import set_expire, is_expire
-from data_server.views import dc
 
-#dcommand = DispatchCommand()
-
-#import data_server.views
-
+logging.config.fileConfig("log.conf")
+logger = logging.getLogger("rserver")
 
 define(name="port", default=8888, help="default port", type=int)
 mmt = NodeManager()
 manager = RoomManager(prefix='')
 clients = []
 client_handler_hash_connect = {}
-
 
 
 class JoinHandler(web.RequestHandler):
@@ -96,7 +93,6 @@ class DashHandler(web.RequestHandler):
             for line in lines:
                 fd.write(line)
                 fd.write("\n")
-
         self.render("dash.html")
 
 
@@ -119,13 +115,23 @@ class WebSocketHandler(websocket.WebSocketHandler):
     
     def open(self):
         """
+        @param ip: node server ip
+        @param port: node server port
+        @param mode: the server connect mode
+        'normally' will given if the machine is first time connect!
+        'recovery' will given if the machine try to reconnect room server!
+        to help room-server remeber something which its missing during some
+        die~~
+        
         Usage:
-            ws = websocket.WebSocketApp("ws://127.0.0.1:8888/ws?ip=%s&port=%s" % (ip, port)
+            ws = websocket.WebSocketApp("ws://127.0.0.1:8888/ws?ip=%s&port=%s&mode=%s" % (ip, port, mode)
         Desc:
             [Node] ----------------> [Area] --------
                                                     ]
             [Node] <--------------------------------
         """
+        mode = self.get_argument('mode')
+        logger.warning('current mode [%s]' %  mode)
         ip = self.get_argument('ip')
         port = self.get_argument("port")
         node_id = mmt.register(self, ip, port)
@@ -150,11 +156,12 @@ class WebSocketHandler(websocket.WebSocketHandler):
         if response:
             self.write_message(response)
 
+
 def check_expire():
     remove_list = []
     for uid in manager._user_pending_status_set:
         if is_expire(uid):
-            print 'uid >>expire ',uid
+            logger.warning("User [%s] has expired" % uid)
             manager.check_out(uid)
             remove_list.append(uid)
 
@@ -164,7 +171,6 @@ def check_expire():
 
 
 if __name__ == '__main__':
-    #import data_server.views
     options.parse_command_line()
     application = web.Application([
 	    (r'/ws', WebSocketHandler),
@@ -175,8 +181,7 @@ if __name__ == '__main__':
 	],
     debug=True,
     template_path=os.path.join(os.path.dirname(__name__),'templates'))
-
-    print 'Listen on ', options.port
+    logger.info('Listen on %s' %  options.port)
     application.listen(options.port)
     ioloop.PeriodicCallback(check_expire, 1000).start()
     ioloop.IOLoop.instance().start()

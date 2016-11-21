@@ -133,8 +133,9 @@ class RTCWebSocketClient(WebSocketClient):
                                                  self.connect_timeout,
                                                  self.request_timeout)
 
-    def connect(self, url, dispatch, auto_reconnet=True, reconnet_interval=10):
+    def connect(self, url, recovery_url, dispatch, auto_reconnet=True, reconnet_interval=10):
         self.ws_url = url
+        self.ws_recovery_url = recovery_url 
         self.auto_reconnet = auto_reconnet
         self.reconnect_interval = reconnet_interval
         self.dispatch = dispatch
@@ -169,7 +170,7 @@ class RTCWebSocketClient(WebSocketClient):
         print 'reconnect'
         if not self.is_connected() and self.auto_reconnet:
             self._io_loop.call_later(self.reconnect_interval,
-                                     super(RTCWebSocketClient, self).connect, self.ws_url)
+                                     super(RTCWebSocketClient, self).connect, self.ws_recovery_url)
 
     def send_heartbeat(self):
         if self.is_connected():
