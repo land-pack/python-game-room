@@ -1,4 +1,5 @@
 import time
+import logging
 import functools
 import json
 import ujson
@@ -7,6 +8,9 @@ from tornado import httpclient
 from tornado import httputil
 from tornado import ioloop
 from tornado import websocket
+
+logger = logging.getLogger("cserver")
+
 
 APPLICATION_JSON = 'application/json'
 
@@ -47,6 +51,7 @@ class WebSocketClient(object):
         ws_conn = websocket.WebSocketClientConnection(self._io_loop, request)
         ws_conn.connect_future.add_done_callback(self._connect_callback)
 
+
     def send(self, data):
         """Send message to the server
         :param str data: message.
@@ -55,6 +60,7 @@ class WebSocketClient(object):
         if self._ws_connection:
             self._ws_connection.write_message(json.dumps(data))
 
+    
     def close(self, reason=''):
         """Close connection.
         """
@@ -74,6 +80,7 @@ class WebSocketClient(object):
         else:
             self.close(future.exception())
 
+    
     def is_connected(self):
         return self._ws_connection is not None
 
@@ -156,21 +163,23 @@ class RTCWebSocketClient(WebSocketClient):
         self.dispatch(self, msg)
 
     def on_connection_success(self):
-        print('Connected!')
+        logger.info('Connect ...')
+        #print 'connect ..'
         #self.send(self.msg)
         self.last_active_time = time.time()
         self.send_heartbeat()
 
     def on_connection_close(self, reason):
-        print('Connection closed reason=%s' % (reason,))
+        logger.warning('Connection closed reason=%s' % (reason,))
         self.pending_hb and self._io_loop.remove_timeout(self.pending_hb)
         self.reconnect()
 
     def reconnect(self):
-        print 'reconnect'
+        logger.info('Reconnect')
+        self.ws_url = self.ws_recovery_url
         if not self.is_connected() and self.auto_reconnet:
             self._io_loop.call_later(self.reconnect_interval,
-                                     super(RTCWebSocketClient, self).connect, self.ws_recovery_url)
+                                     super(RTCWebSocketClient, self).connect, self.ws_url)
 
     def send_heartbeat(self):
         if self.is_connected():
@@ -184,11 +193,11 @@ class RTCWebSocketClient(WebSocketClient):
 
 
 def dispatch(websocket_handler, message):
-    print '>>>>I am dispatch', message
+    logger.debug('Recv: %s' % message)
+
 
 def main():
     io_loop = ioloop.IOLoop.instance()
-
     client = RTCWebSocketClient(io_loop)
     #ws_url = 'ws://127.0.0.1:8090/ws'
     ws_url = 'ws://echo.websocket.org'
