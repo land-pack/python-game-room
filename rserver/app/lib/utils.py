@@ -1,7 +1,10 @@
+import logging
 import time
 import redis
 import ujson
 
+
+logger = logging.getLogger("rserver")
 
 r = redis.Redis(host='127.0.0.1', port=6379)
 
@@ -33,6 +36,20 @@ def mark_connected(key):
         r.delete(str_key)
     else:
         r.delete(key)
+
+
+def check_expire(manager):
+    remove_list = []
+    for uid in manager._user_pending_status_set:
+        if is_expire(uid):
+            logger.warning("User [%s] has expired" % uid)
+            manager.check_out(uid)
+            remove_list.append(uid)
+
+    for uid in remove_list:
+        remove_list.remove(uid)
+        manager._user_pending_status_set.remove(uid)
+
 
 
 if __name__ == '__main__':

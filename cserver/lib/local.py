@@ -48,6 +48,10 @@ class LocalManager(object):
         self.node_id = node_id
 
 
+    def set_id(self, node_id):
+        self.node_id = node_id
+
+
     def check_in(self, connect, room, uid):
         if room in self._room_hash_user:
             self._room_hash_user[room].add(uid)

@@ -8,6 +8,8 @@ from forgery_py import name as fgname
 def join_request():
     uid = fgname.full_name()
     response = requests.get('http://127.0.0.1:8888/api/join?uid=%s' % uid)
+    print '*'*100
+    print response.content
 
 
 if __name__ == '__main__':

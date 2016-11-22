@@ -34,10 +34,14 @@ def check_out(message, mmt, manager):
     if uid in manager._user_pending_status_set:
         return {"command":"ack_check_out", "status": "bad", "info":  "[Error] you have not check in!"}
     elif uid in manager._user_hash_room:
-        print ' can i got there'
         #del key from redis
         manager.check_out(uid)
         mmt.flying(uid) #update _node_hash_user counter
         return {"command":"ack_check_out", "status": "ok"}
     else:
         return {"command":"ack_check_out", "status": "bad", "info": "you may has already check out"}
+
+@dc.route("ack_recovery")
+def ack_recovery(message, mmt, manager):
+    mmt.recovery(message)
+    return {"command":"ack_recovery", "status": "ok"}

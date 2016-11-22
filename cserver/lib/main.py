@@ -5,7 +5,7 @@ from websocket import RTCWebSocketClient
 
 
 
-def run(cport=8888, port=9001, dc=None, mode=None):
+def run(cport=8888, port=9001, dc=None, mode=None, lm=None):
     host=socket.gethostname()
     ip=socket.gethostbyname(host)
     ws_url = 'ws://127.0.0.1:%s/ws?ip=%s&port=%s&mode=%s' % (cport, ip, port, 'normally')

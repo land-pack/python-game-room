@@ -26,7 +26,9 @@ define(name="cport", default=8888, help="default port", type=int)
 
 cm = ConnectMode()
 mode = cm.mode
-io_loop, websocket_client = run(port=options.port, dc=dc, mode=mode)
+lm = LocalManager()
+
+io_loop, websocket_client = run(port=options.port, dc=dc, mode=mode, lm=lm)
 
 g_client_connect = []
 g_connect_hash_uid = {}
@@ -39,7 +41,7 @@ options.parse_command_line()
 
 
 
-lm = LocalManager()
+
 """
     Delegate Server ----------WebSocket-------> Area Server
 """
