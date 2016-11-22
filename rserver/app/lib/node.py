@@ -76,12 +76,17 @@ class BaseMachineHashNodeManager(object):
         self._node_max_user_number = users
 
 
-    def register(self, connect, ip, port):
+    def register(self, connect, ip, port, mode=-1):
         """
         @param ip: proxy server ip
         @param port: proxy server port
+        @param mode: -1 --> normaly, 0+ --> recovery
         @return: None
         """
+        if mode == -1:
+            node_id = self._node_index
+        else:
+            node_id = mode
         key = "%s-%s" % (ip, port)
         if key in self._machine_hash_connect:
             """
@@ -98,15 +103,15 @@ class BaseMachineHashNodeManager(object):
             This node is first time come to the server
             so register as new one!
             """
-            node_id = self._node_index
-            self._machine_hash_node[key] = self._node_index
-            self._node_hash_room[self._node_index] = []
+            self._machine_hash_node[key] = node_id
+            self._node_hash_room[node_id] = []
             self._connect_hash_machine[id(connect)] = key
             self._machine_hash_connect[key] = id(connect)
-            self._node_hash_machine[self._node_index]=key
-            self._node_hash_counter[self._node_index]= 0    # 0 room number!
-            self._node_hash_user[self._node_index]= 0    # 0 user number!
-            self._node_index = self._node_index + 1
+            self._node_hash_machine[node_id]=key
+            self._node_hash_counter[node_id]= 0    # 0 room number!
+            self._node_hash_user[node_id]= 0    # 0 user number!
+            if mode == -1:
+                self._node_index = self._node_index + 1
             return node_id
     
     
@@ -233,13 +238,7 @@ class NodeManager(BaseMachineHashNodeManager):
         self._node_hash_user[node] = self._node_hash_user[node] - 1
 
 
-    def recovery_connect(self ,connect, ip, port):
-        key = "%s-%s" % (ip, port)
-        self._connect_hash_machine[id(connect)] = key
-        self._machine_hash_connect[key] = id(connect)
-    
-
-    def recovery(self, connect, data):
+    def recovery_data(self, data):
         """
         @param data: a dict-type
         Example:
@@ -259,10 +258,6 @@ class NodeManager(BaseMachineHashNodeManager):
         machine = data.get("machine")
         
         self._node_hash_user[node] = user
-        self._node_hash_machine[node] = machine
-        self._machine_hash_node[machine] = node
-        self._connect_hash_machine[id(machine)]
-        self._machine_hash_connect[id(connect)]
         self._node_hash_counter[node] = counter
         for room in rooms:
             self._room_hash_node[room] = node
@@ -282,15 +277,29 @@ class NodeManager(BaseMachineHashNodeManager):
 
 
 if __name__ == '__main__':
-    mmt = NodeManager()
-    mmt.register('connect1', '127.0.0.1','9001')
-    mmt.register('connect2', '127.0.0.1','9002')
-    print mmt._machine_hash_connect 
-    print mmt._connect_hash_machine
-    print mmt._machine_hash_node
-    print mmt._node_hash_room
-    print mmt._room_hash_node 
-    print 'test unregister'
-    mmt.unregister('connect2')
-    mmt.register('connect2a', '127.0.0.1','9002')
-    print mmt._node_hash_room
+ 
+#   mmt = NodeManager()
+#    mmt.register('connect1', '127.0.0.1','9001')
+#    mmt.register('connect2', '127.0.0.1','9002')
+#    print mmt._machine_hash_connect 
+#    print mmt._connect_hash_machine
+#    print mmt._machine_hash_node
+#    print mmt._node_hash_room
+#    print mmt._room_hash_node 
+#    print 'test unregister'
+#    mmt.unregister('connect2')
+#    mmt.register('connect2a', '127.0.0.1','9002')
+#    print mmt._node_hash_room
+    #=====================recovery test
+    empty = NodeManager()
+    empty.register('connect1', '127.0.0.1','9002', mode=2)
+    #empty.recovery_connect('connect1a', '127.0.0.1','9002')
+    sample_data = {
+                    'node': 2,                      # Node id
+                    'user': 18,                     # user number
+                    'rooms': ['r1', 'r2', 'r3'],    # room set
+                    'counter': 8,                  # the total room in node
+                    'machine':'127.0.0.1-9002'      # machine id
+                }
+    empty.recovery_data(sample_data)
+    empty.status()

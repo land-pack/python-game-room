@@ -41,15 +41,16 @@ class LocalManager(object):
         }
     """
     _uid_hash_websocket_handler = {}
+    """
+    @property node_id
+    When the register success! this value will set! do never change !
+    Default is `-1`, when it register succes, should be large than `0`!
+    """
+    node_id = -1
     
 
-
-    def __init__(self, node_id=None):
-        self.node_id = node_id
-
-
-    def set_id(self, node_id):
-        self.node_id = node_id
+    def __init__(self):
+        pass
 
 
     def check_in(self, connect, room, uid):

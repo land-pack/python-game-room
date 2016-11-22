@@ -1,16 +1,5 @@
 import ujson
 
-class ConnectMode(object):
-    _mode_choice = ['normally', 'recovery']
-    def __init__(self):
-        self.index = 0
-    
-    @property
-    def mode(self):
-        ret = self._mode_choice[self.index]
-        self.index = 1
-        return ret
-
 
 class DispatchCommand(object):
     
@@ -25,11 +14,11 @@ class DispatchCommand(object):
         return _route
 
     
-    def dispatch(self, handler, message ):
+    def dispatch(self, handler, message, lm):
         data = ujson.loads(message)
         command = data.get("command")
         if command in self._command_hash_views:
-            self._command_hash_views[command](handler, data)
+            self._command_hash_views[command](handler, data, lm)
         else:
            #handler.send("404 Error")
             print "404--Can't parser command[%s]" % command

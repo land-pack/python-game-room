@@ -8,14 +8,14 @@ from tornado import ioloop
 from tornado import websocket
 from tornado import web
 from tornado.options import options, define
-from lib.views import dc # to trigger the DispatchCommand 
-from lib.chat import tm
-from lib.main import run
-from lib.local import LocalManager 
-from lib.chat import TalkManager
-from lib.core import ConnectMode 
+#from lib.views import dc # to trigger the DispatchCommand 
+#from lib.views import lm as lsystem
+#from lib.chat import tm
+#from lib.chat import TalkManager
 import lib.color
+from app.system import LocalSystem
 
+lsystem = LocalSystem()
 
 
 logging.config.fileConfig("log.conf")
@@ -24,11 +24,7 @@ logger = logging.getLogger("cserver")
 define(name="port", default=9001, help="default port", type=int)
 define(name="cport", default=8888, help="default port", type=int)
 
-cm = ConnectMode()
-mode = cm.mode
-lm = LocalManager()
 
-io_loop, websocket_client = run(port=options.port, dc=dc, mode=mode, lm=lm)
 
 g_client_connect = []
 g_connect_hash_uid = {}
@@ -89,7 +85,7 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
             else:
                 wait.. 
         """
-        response = lm.check_out(self)
+       # response = lm.check_out(self)
         g_client_connect.remove(self)
         del g_connect_hash_uid[id(self)]
         #uid = clients[id(self)]
@@ -102,7 +98,7 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
         #    }
 
         print ' send client close notify  to server'
-        websocket_client.send(response)
+        #websocket_client.send(response)
 
 
 
@@ -113,7 +109,7 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
         #response = ujson.dumps({"command":"in"})
         #tm.render(msg)
         #self.write_message(response)
-        response = tm.render(msg, lm)
+       # response = tm.render(msg, lm)
         if response:
             self.write_message(response)
 
@@ -125,7 +121,8 @@ def main():
         debug=True)
     application.listen(options.port)
 
-
+    io_loop = ioloop.IOLoop.current()
+    lsystem.run()
     io_loop.start()
 
 if __name__ == '__main__':

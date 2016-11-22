@@ -134,24 +134,20 @@ class WebSocketHandler(websocket.WebSocketHandler):
         """
         mode = self.get_argument('mode')
         logger.warning('current mode [%s]' %  mode)
-        if mode == 'recovery':
-            ip = self.get_argument('ip')
-            port = self.get_argument("port")
-            mmt.recovery_connect(self, ip, port)
-            clients.append(self)
-            client_handler_hash_connect[id(self)] = self
-            #response = {"command":"recovery", "status":"success"}
-            response = {"command":"connect", "status":"ok", "mode":"recovery"}
+        ip = self.get_argument('ip')
+        port = self.get_argument("port")
+        clients.append(self)
+        client_handler_hash_connect[id(self)] = self
+        if int(mode) == -1:
+        # Normally mode
+            node_id = mmt.register(self, ip, port, mode=mode)
+            response = {"command":"connect", "status":"ok", "mode":"normally","node":node_id}
             self.write_message(ujson.dumps(response))
         else:
-            ip = self.get_argument('ip')
-            port = self.get_argument("port")
-            node_id = mmt.register(self, ip, port)
-            clients.append(self)
-            client_handler_hash_connect[id(self)] = self
-            response = {"node_id":node_id}
-            response = {"command":"connect", "status":"ok", "mode":"normally"}
+            node_id = mmt.register(self, ip, port, mode=mode)
+            response = {"command":"connect", "status":"ok", "mode":"recovery"}
             self.write_message(ujson.dumps(response))
+
 
 
     def on_close(self):

@@ -12,8 +12,8 @@ from app.views import manager
 
 logging.config.fileConfig("log.conf")
 logger = logging.getLogger("rserver")
-
 define(name="port", default=8888, help="default port", type=int)
+
 
 if __name__ == '__main__':
     options.parse_command_line()
