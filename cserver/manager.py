@@ -15,7 +15,7 @@ from tornado.options import options, define
 import lib.color
 from app.system import LocalSystem
 
-lsystem = LocalSystem()
+local_system = LocalSystem()
 
 
 logging.config.fileConfig("log.conf")
@@ -122,7 +122,7 @@ def main():
     application.listen(options.port)
 
     io_loop = ioloop.IOLoop.current()
-    lsystem.run()
+    local_system.run()
     io_loop.start()
 
 if __name__ == '__main__':

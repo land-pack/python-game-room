@@ -7,48 +7,79 @@ from machine import MachineManager
 
 class LocalSystem(RTCWebSocketClient, MachineManager):
     """
+    LocalSystem
+    Combine two core thing! 1, the websocket client side implement on tornado!
+    2, Machine / Basic data manager!
     """
     _command_hash_views = {}
+
     def route(self, command):
+        """
+        The route method as it's name implicate, we can route the message to
+        their own view function. how do we use it?
+        Example:
+            @local_system.route("connect")
+            def connect(handler, data):
+                data = to_do(data)
+                handler.send(data)
+
+        Args:
+            command:
+
+        Returns:
+
+        """
+
         def _route(func):
             self._command_hash_views[command] = func
+
             def __route(*args, **kwargs):
                 return func(*args, **kwargs)
-            return _route
+
+            return __route
+
         return _route
 
-
     def dispatch(self, message):
+        """
+        The message can be anything, but always format like `Example` show,
+        this method will dispatch each message to they own home view function!
+        Once the websocket connect success, the first message will receive from
+        room server. the `command` field should be filled with `connect`. if everything
+        goes right! the `connect` function will trigger, and then time to work with
+        `MachineManager` which inside property `check_in` will be called. Cause we need
+        to process `ip-port` hash to `node`.
+
+        Args:
+            message: a string type, from room server side!
+            Example '{"command": "connect", "status": "ok"}'
+        Returns:
+            None
+        """
         data = ujson.loads(message)
-        command = data.get("command","something")
+        command = data.get("command", "something")
         if command in self._command_hash_views:
-            self._command_hash_views[command](handler, data)
+            self._command_hash_views[command](self, data)
         else:
-            #handler.send("404 Error")
+            # handler.send("404 Error")
             print "404--Can't parser command[%s]" % command
 
-   
-    def run(self, rsp=8888, port=9001, dc=None):
+    def run(self, rsp=8888, port=9001):
         """
-        @param rsp: room server port
-        @param port: current server listen port
-        @return None
+        Args:
+            rsp: The room server listen port
+            port: The current machine listen port
+        Returns:
+            None
         """
-        #io_loop = ioloop.IOLoop.current().instance()
-        host=socket.gethostname()
-        ip=socket.gethostbyname(host)
-        ws_url = 'ws://127.0.0.1:%s/ws?ip=%s&port=%s&mode=%s' % (rsp, ip, port, -1)
+        host = socket.gethostname()
+        ip = socket.gethostbyname(host)
+        ws_url = 'ws://127.0.0.1:%s/ws?ip=%s&port=%s&mode=%s' % (rsp, ip, port, self._node_id)
         self.connect(ws_url, auto_reconnet=True, reconnet_interval=10)
 
 
 if __name__ == '__main__':
-
-    lsystem = LocalSystem()
-    lsystem.run()
+    local_system = LocalSystem()
+    local_system.run()
     io_loop = ioloop.IOLoop.current().instance()
-    try:
-        io_loop.start()
-    except KeyboardInterrupt:
-        client.close()
-
-
+    io_loop.start()

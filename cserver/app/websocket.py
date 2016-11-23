@@ -9,9 +9,7 @@ from tornado import httputil
 from tornado import ioloop
 from tornado import websocket
 
-
 logger = logging.getLogger("cserver")
-
 
 APPLICATION_JSON = 'application/json'
 DEFAULT_CONNECT_TIMEOUT = 30
@@ -36,7 +34,6 @@ class WebSocketClient(object):
         self._ws_connection = None
         self._connect_status = self.DISCONNECTED
 
-
     def connect(self, url):
         """Connect to the server.
         :param str url: server URL.
@@ -50,7 +47,6 @@ class WebSocketClient(object):
         ws_conn = websocket.WebSocketClientConnection(self._io_loop, request)
         ws_conn.connect_future.add_done_callback(self._connect_callback)
 
-
     def send(self, data):
         """Send message to the server
         :param str data: message.
@@ -58,7 +54,6 @@ class WebSocketClient(object):
         if self._ws_connection:
             self._ws_connection.write_message(ujson.dumps(data))
 
-    
     def close(self, reason=''):
         """Close connection.
         """
@@ -69,7 +64,6 @@ class WebSocketClient(object):
             self._ws_connection = None
             self.on_connection_close(reason)
 
-
     def _connect_callback(self, future):
         if future.exception() is None:
             self._connect_status = self.CONNECTED
@@ -79,10 +73,8 @@ class WebSocketClient(object):
         else:
             self.close(future.exception())
 
-    
     def is_connected(self):
         return self._ws_connection is not None
-
 
     @gen.coroutine
     def _read_messages(self):
@@ -93,19 +85,16 @@ class WebSocketClient(object):
                 break
             self.on_message(msg)
 
-
     def on_message(self, msg):
         """This is called when new message is available from the server.
         :param str msg: server message.
         """
         pass
 
-
     def on_connection_success(self):
         """This is called on successful connection ot the server.
         """
         pass
-
 
     def on_connection_close(self, reason):
         """This is called when server closed the connection.
@@ -117,7 +106,6 @@ class RTCWebSocketClient(WebSocketClient):
     hb_msg = {'command': 'ping'}  # hearbeat
     message = ''
     heartbeat_interval = 3
-    
 
     def __init__(self, io_loop=None,
                  connect_timeout=DEFAULT_CONNECT_TIMEOUT,
@@ -141,23 +129,19 @@ class RTCWebSocketClient(WebSocketClient):
         self.reconnect_interval = reconnet_interval
         super(RTCWebSocketClient, self).connect(self.ws_url)
 
-
     def send(self, msg):
         super(RTCWebSocketClient, self).send(msg)
         self.last_active_time = time.time()
 
-
     def on_message(self, msg):
         self.last_active_time = time.time()
         self.dispatch(msg)
-
 
     def on_connection_success(self):
         logger.info('Connect ...')
         self.last_active_time = time.time()
         self.send_heartbeat()
 
-    
     def on_connection_close(self, reason):
         logger.warning('Connection closed reason=%s' % (reason,))
         self.pending_hb and self._io_loop.remove_timeout(self.pending_hb)
@@ -165,8 +149,10 @@ class RTCWebSocketClient(WebSocketClient):
 
     def reconnect(self):
         logger.info('Reconnect')
-        #self.ws_url = self.ws_recovery_url + lm.node_id
-        #logger.info("Send node id [%s] to remote server" % lm.node_id)
+        # TODO when reconnect the room server has trigger,
+        # TODO the url should has new param ~~
+        # self.ws_url = self.ws_recovery_url % self._nod_id
+        # logger.info("Send node id [%s] to remote server" % lm.node_id)
         if not self.is_connected() and self.auto_reconnet:
             self._io_loop.call_later(self.reconnect_interval,
                                      super(RTCWebSocketClient, self).connect, self.ws_url)
@@ -180,9 +166,7 @@ class RTCWebSocketClient(WebSocketClient):
 
             self.pending_hb = self._io_loop.call_later(self.heartbeat_interval, self.send_heartbeat)
 
-
-
-    def dispatch(self,  message):
+    def dispatch(self, message):
         """
         You must  override this method!
         """
@@ -193,7 +177,7 @@ def main():
     io_loop = ioloop.IOLoop.instance()
     client = RTCWebSocketClient(io_loop)
     ws_url = 'ws://127.0.0.1:8888/ws?ip=127.0.0.1&port=9001&mode=1'
-    #ws_url = 'ws://echo.websocket.org'
+    # ws_url = 'ws://echo.websocket.org'
     client.connect(ws_url, auto_reconnet=True, reconnet_interval=10)
 
     try:
