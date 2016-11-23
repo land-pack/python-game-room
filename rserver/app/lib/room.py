@@ -231,6 +231,18 @@ class _BaseRoomManager(object):
 
 class RoomManager(_BaseRoomManager):
 
+    def recovery(self, data):
+        """
+        self._room_hash_user_set = {"room1": ["user1", "user2"],"room2":[...]}
+        self._user_hash_room = {"user1": "room1", "user1":"room1", "user2":"room2}
+        self._room_hash_lack_level = {"room1": 1,"room2":2}
+        self._lack_level_hash_room_set = {1: [ "room1", "room2" ] : ["room3", "room4"]}
+        self._room_counter = 4
+        self._user_counter = 8
+        """
+        pass
+
+
     def status(self):
         print '+' * 50
         print '_room_hash_user_set:',    self._room_hash_user_set
