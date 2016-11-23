@@ -138,12 +138,16 @@ class WebSocketHandler(websocket.WebSocketHandler):
         port = self.get_argument("port")
         clients.append(self)
         client_handler_hash_connect[id(self)] = self
-        if int(mode) == -1:
+        logger.warning("The mode is [%s]" % mode)
+        mode = int(mode)
+        if mode == -1:
         # Normally mode
             node_id = mmt.register(self, ip, port, mode=mode)
+            logger.warning("The node is is [%s]" % node_id)
             response = {"command":"connect", "status":"ok", "mode":"normally","node":node_id}
             self.write_message(ujson.dumps(response))
         else:
+            logger.warning("Recovery data ....")
             node_id = mmt.register(self, ip, port, mode=mode)
             response = {"command":"connect", "status":"ok", "mode":"recovery"}
             self.write_message(ujson.dumps(response))

@@ -13,9 +13,9 @@ from tornado.options import options, define
 #from lib.chat import tm
 #from lib.chat import TalkManager
 import lib.color
-from app.system import LocalSystem
-
-local_system = LocalSystem()
+#from app.system import LocalSystem
+#local_system = LocalSystem()
+from app.views import local_system
 
 
 logging.config.fileConfig("log.conf")
@@ -28,13 +28,6 @@ define(name="cport", default=8888, help="default port", type=int)
 
 g_client_connect = []
 g_connect_hash_uid = {}
-
-
-
-options.parse_command_line()
-
-
-
 
 
 
@@ -115,14 +108,15 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
 
 
 def main():
+    #import app.views
     application = web.Application([
         (r'/ws', DelegateWebSocketHandler),
         ],
         debug=True)
+    options.parse_command_line()
     application.listen(options.port)
-
     io_loop = ioloop.IOLoop.current()
-    local_system.run()
+    local_system.run(port=options.port)
     io_loop.start()
 
 if __name__ == '__main__':

@@ -83,6 +83,7 @@ class BaseMachineHashNodeManager(object):
         @param mode: -1 --> normaly, 0+ --> recovery
         @return: None
         """
+        mode = int(mode)
         if mode == -1:
             node_id = self._node_index
         else:

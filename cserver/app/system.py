@@ -13,6 +13,7 @@ class LocalSystem(RTCWebSocketClient, MachineManager):
     """
     _command_hash_views = {}
 
+
     def route(self, command):
         """
         The route method as it's name implicate, we can route the message to
@@ -72,9 +73,9 @@ class LocalSystem(RTCWebSocketClient, MachineManager):
         Returns:
             None
         """
-        host = socket.gethostname()
-        ip = socket.gethostbyname(host)
-        ws_url = 'ws://127.0.0.1:%s/ws?ip=%s&port=%s&mode=%s' % (rsp, ip, port, self._node_id)
+        ip = socket.gethostbyname(socket.gethostname())
+        url_template = 'ws://127.0.0.1:%s/ws?ip=%s&port=%s' % (rsp, ip, port)
+        ws_url = url_template + "&mode=%s"
         self.connect(ws_url, auto_reconnet=True, reconnet_interval=10)
 
 

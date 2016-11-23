@@ -1,8 +1,14 @@
-from system import local_system
+import logging
+from system import LocalSystem
+local_system = LocalSystem()
 
+
+logger = logging.getLogger("cserver")
 
 @local_system.route("connect")
 def connect(handler, data):
+    logger.info("Connect success")
+    logger.info("Register sucess with node [%s]" % data.get("node"))
     node = data.get("node")
     handler.set_node(node)
     response = {"command": " ack_connect"}

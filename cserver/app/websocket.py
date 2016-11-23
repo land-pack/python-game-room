@@ -124,7 +124,8 @@ class RTCWebSocketClient(WebSocketClient):
                                                  self.request_timeout)
 
     def connect(self, url, auto_reconnet=True, reconnet_interval=10):
-        self.ws_url = url
+        self.url_template = url
+        self.ws_url = url % self._node_id
         self.auto_reconnet = auto_reconnet
         self.reconnect_interval = reconnet_interval
         super(RTCWebSocketClient, self).connect(self.ws_url)
@@ -152,7 +153,8 @@ class RTCWebSocketClient(WebSocketClient):
         # TODO when reconnect the room server has trigger,
         # TODO the url should has new param ~~
         # self.ws_url = self.ws_recovery_url % self._nod_id
-        # logger.info("Send node id [%s] to remote server" % lm.node_id)
+        logger.info("Send node id [%s] to remote server" % self._node_id)
+        self.ws_url = self.url_template % self._node_id
         if not self.is_connected() and self.auto_reconnet:
             self._io_loop.call_later(self.reconnect_interval,
                                      super(RTCWebSocketClient, self).connect, self.ws_url)
