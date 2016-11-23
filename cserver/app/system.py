@@ -1,9 +1,11 @@
 import socket
+import logging
 import ujson
 from tornado import ioloop
 from websocket import RTCWebSocketClient
 from machine import MachineManager
 
+logger = logging.getLogger("cserver")
 
 class LocalSystem(RTCWebSocketClient, MachineManager):
     """
@@ -63,7 +65,7 @@ class LocalSystem(RTCWebSocketClient, MachineManager):
             self._command_hash_views[command](self, data)
         else:
             # handler.send("404 Error")
-            print "404--Can't parser command[%s]" % command
+            logger.warning("Sorry! System don't understand command[%s]" % command)
 
     def run(self, rsp=8888, port=9001):
         """
