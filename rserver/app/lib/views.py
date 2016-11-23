@@ -1,7 +1,9 @@
+import logging
 from core import DispatchCommand
 from utils import is_expire , mark_connected
 dc = DispatchCommand()
 
+logger = logging.getLogger("rserver")
 
 
 @dc.route("ping")
