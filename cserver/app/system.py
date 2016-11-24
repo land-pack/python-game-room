@@ -60,7 +60,8 @@ class LocalSystem(RTCWebSocketClient, MachineManager):
             None
         """
         data = ujson.loads(message)
-        command = data.get("command", "something")
+        print  '....///',data
+        command = data.get("command", "no command field!")
         if command in self._command_hash_views:
             self._command_hash_views[command](self, data)
         else:

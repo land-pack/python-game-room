@@ -22,3 +22,8 @@ def recovery(handler, data):
 @local_system.route("sync_all")
 def sync_all(handler, data):
     logger.info("[Sync] data to room server")
+
+
+@local_system.route("check_in")
+def check_in(handler, data):
+    logger.info("[In] One user has join")

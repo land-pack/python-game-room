@@ -64,7 +64,7 @@ class JoinHandler(web.RequestHandler):
         machine = "%s-%s" % (ip, port)
         client_handler = mmt._machine_hash_connect[machine]
         connect = client_handler_hash_connect[client_handler]
-        connect.write_message(ujson.dumps({"uid":uid, "room":room, "node":node}))
+        connect.write_message(ujson.dumps({"command":"check_in", "uid":uid, "room":room, "node":node}))
         set_expire(uid)
         self.write(ujson.dumps(response))
 
