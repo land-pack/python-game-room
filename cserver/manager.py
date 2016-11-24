@@ -55,12 +55,15 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
             url="ws://127.0.0.1:8880/ws?ip=%s&port=%s&node=%s&room=%s&uid=%s" % (ip, port, node, room, uid)
             ws = websocket.WebSocketApp(url)
         """
+        ip = self.get_argument("ip")
+        port = self.get_argument("port")
+        node = self.get_argument("node")
         uid = self.get_argument("uid")
         room = self.get_argument("room")
-        response = lm.check_in(self, room, uid)
         g_client_connect.append(self)
         g_connect_hash_uid[id(self)]=uid
-        local_system.check_in(self, room, uid)
+        #local_system.check_in(self, room, uid)
+
 
     def on_close(self):
         """
@@ -80,10 +83,11 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
 
 
     def on_message(self, msg):
-        data = local_system.parser(msg)
-        response = local_system.check_in(data)
-        if response:
-            self.write_message(response)
+        #data = local_system.parser(msg)
+        #response = local_system.check_in(data)
+        #if response:
+        #    self.write_message(response)
+        logger.info("[client] recv: %s" % msg)
 
 
 def main():

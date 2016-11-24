@@ -52,7 +52,7 @@ class JoinHandler(web.RequestHandler):
         uid = self.get_argument("uid")
         room = manager.check_in(uid)
         response = mmt.landing(room, uid)
-        print 'landing response', response
+        logger.info('landing response[%s]' % response)
         if response == -1:
             # rollback ...
             manager.check_out(uid)
@@ -161,7 +161,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
 
 
     def on_message(self, msg):
-        logger.info('[Recv] %s' % msg)
+        logger.info('[Recv] from client server: %s' % msg)
         response = dc.render(msg, mmt, manager=manager)
         if response:
             self.write_message(response)

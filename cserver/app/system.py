@@ -60,13 +60,12 @@ class LocalSystem(RTCWebSocketClient, MachineManager):
             None
         """
         data = ujson.loads(message)
-        print  '....///',data
         command = data.get("command", "no command field!")
         if command in self._command_hash_views:
             self._command_hash_views[command](self, data)
         else:
             # handler.send("404 Error")
-            logger.warning("Sorry! System don't understand command[%s]" % command)
+            logger.warning("[Local] System don't understand command[%s]" % command)
 
     def run(self, rsp=8888, port=9001):
         """

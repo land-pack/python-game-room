@@ -7,7 +7,7 @@ logger = logging.getLogger("cserver")
 
 @local_system.route("connect")
 def connect(handler, data):
-    logger.info("Register sucess with node [%s]" % data.get("node"))
+    logger.info("[Local] register sucess with node [%s]" % data.get("node"))
     node = data.get("node")
     handler.set_node(node)
     response = {"command": " ack_connect"}
@@ -21,9 +21,9 @@ def recovery(handler, data):
 
 @local_system.route("sync_all")
 def sync_all(handler, data):
-    logger.info("[Sync] data to room server")
+    logger.info("[Local] data to room server")
 
 
 @local_system.route("check_in")
 def check_in(handler, data):
-    logger.info("[In] One user has join")
+    logger.info("[Local] One user has join")
