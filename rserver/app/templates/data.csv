@@ -1,4 +1,6 @@
 id,value
 Manager
 Manager.node_0
-Manager.node_1
+Manager.node_0.room_0
+Manager.node_0.room_0.uid_jack
+Manager.node_0.room_0.uid_frankak

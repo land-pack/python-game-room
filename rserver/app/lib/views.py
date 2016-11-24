@@ -19,8 +19,8 @@ def ack_sync(message, mmt, manager):
     pass
 
 
-@dc.route("check_in")
-def check_in(message, mmt, manager):
+@dc.route("ack_check_in")
+def ack_check_in(message, mmt, manager):
     uid = message.get("uid")
     if uid in manager._user_pending_status_set:
         manager._user_pending_status_set.remove(uid)

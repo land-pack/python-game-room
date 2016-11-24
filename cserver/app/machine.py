@@ -19,6 +19,11 @@ class MachineManager(object):
     To keep the _node_id, only be changed one time!
     """
     _set_node_flag = True
+    
+    _room_hash_uid_set = set()
+    _uid_hash_room = {}
+    _handler_hash_connect = {}
+    _uid_hash_handler = {}
 
     def set_node(self, node):
         """
@@ -41,3 +46,12 @@ class MachineManager(object):
 
         """
         pass
+
+    
+    def check_in(self, connect, room, uid):
+        self._handler_hash_connect[id(connect)] = connect
+        self._uid_hash_handler[uid] = connect
+        self._uid_hash_room[uid] = room
+        self._room_hash_uid_set.add(uid)
+        response = {"command":"ack_check_in", "uid":uid}
+        self.send(response)

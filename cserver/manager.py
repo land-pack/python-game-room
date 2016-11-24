@@ -62,7 +62,7 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
         room = self.get_argument("room")
         g_client_connect.append(self)
         g_connect_hash_uid[id(self)]=uid
-        #local_system.check_in(self, room, uid)
+        local_system.check_in(self, room, uid)
 
 
     def on_close(self):
