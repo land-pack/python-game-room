@@ -20,9 +20,10 @@ class MachineManager(object):
     """
     _set_node_flag = True
     
-    _room_hash_uid_set = set()
+    _room_hash_uid_set = {}
     _uid_hash_room = {}
     _handler_hash_connect = {}
+    _handler_hash_uid = {}
     _uid_hash_handler = {}
 
     def set_node(self, node):
@@ -51,7 +52,25 @@ class MachineManager(object):
     def check_in(self, connect, room, uid):
         self._handler_hash_connect[id(connect)] = connect
         self._uid_hash_handler[uid] = connect
+        self._handler_hash_uid[id(connect)] = uid
         self._uid_hash_room[uid] = room
-        self._room_hash_uid_set.add(uid)
+        if room in self._room_hash_uid_set:
+            self._room_hash_uid_set[room].add(uid)
+        else:
+            self._room_hash_uid_set[room] = set()
+            self._room_hash_uid_set[room].add(uid)
         response = {"command":"ack_check_in", "uid":uid}
+        self.send(response)
+
+
+    def check_out(self, connect):
+        handler = id(connect)
+        uid = self._handler_hash_uid[handler]
+        room = self._uid_hash_room[uid]
+        del self._uid_hash_room[uid]
+        del self._uid_hash_handler[uid]
+        del self._handler_hash_uid[handler]
+        del self._handler_hash_connect[handler]
+        self._room_hash_uid_set[room].remove(uid)
+        response = {"command":"ack_check_out", "uid":uid}
         self.send(response)

@@ -30,7 +30,7 @@ def ack_check_in(message, mmt, manager):
         return {"command":"ack_check_in", "status": "bad"}
         
 
-@dc.route("check_out")
+@dc.route("ack_check_out")
 def check_out(message, mmt, manager):
     uid = message.get("uid")
     if uid in manager._user_pending_status_set:

@@ -3,4 +3,7 @@ Manager
 Manager.node_0
 Manager.node_0.room_0
 Manager.node_0.room_0.uid_jack
-Manager.node_0.room_0.uid_frankak
+Manager.node_0.room_0.uid_single
+Manager.node_0.room_0.uid_mokey
+Manager.node_0.room_1
+Manager.node_0.room_1.uid_laskk
