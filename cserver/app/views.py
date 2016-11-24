@@ -7,7 +7,6 @@ logger = logging.getLogger("cserver")
 
 @local_system.route("connect")
 def connect(handler, data):
-    logger.info("Connect success")
     logger.info("Register sucess with node [%s]" % data.get("node"))
     node = data.get("node")
     handler.set_node(node)
@@ -15,8 +14,8 @@ def connect(handler, data):
     handler.send(response)
 
 
-@local_system.route("reconnect")
-def reconnect(handler, data):
+@local_system.route("recovery")
+def recovery(handler, data):
     data = handler.help_recovery()
     handler.send(data)
 

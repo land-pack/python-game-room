@@ -76,18 +76,18 @@ class BaseMachineHashNodeManager(object):
         self._node_max_user_number = users
 
 
-    def register(self, connect, ip, port, mode=-1):
+    def register(self, connect, ip, port, node=-1):
         """
         @param ip: proxy server ip
         @param port: proxy server port
-        @param mode: -1 --> normaly, 0+ --> recovery
+        @param node: -1 --> normaly, 0+ --> recovery
         @return: None
         """
-        mode = int(mode)
-        if mode == -1:
+        node = int(node)
+        if node == -1:
             node_id = self._node_index
         else:
-            node_id = mode
+            node_id = node
         key = "%s-%s" % (ip, port)
         if key in self._machine_hash_connect:
             """
@@ -111,7 +111,7 @@ class BaseMachineHashNodeManager(object):
             self._node_hash_machine[node_id]=key
             self._node_hash_counter[node_id]= 0    # 0 room number!
             self._node_hash_user[node_id]= 0    # 0 user number!
-            if mode == -1:
+            if node == -1:
                 self._node_index = self._node_index + 1
             return node_id
     
@@ -293,7 +293,7 @@ if __name__ == '__main__':
 #    print mmt._node_hash_room
     #=====================recovery test
     empty = NodeManager()
-    empty.register('connect1', '127.0.0.1','9002', mode=2)
+    empty.register('connect1', '127.0.0.1','9002', node=2)
     #empty.recovery_connect('connect1a', '127.0.0.1','9002')
     sample_data = {
                     'node': 2,                      # Node id

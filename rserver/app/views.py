@@ -119,37 +119,37 @@ class WebSocketHandler(websocket.WebSocketHandler):
         """
         @param ip: node server ip
         @param port: node server port
-        @param mode: the server connect mode
+        @param node: the server connect node
         'normally' will given if the machine is first time connect!
         'recovery' will given if the machine try to reconnect room server!
         to help room-server remeber something which its missing during some
         die~~
         
         Usage:
-            ws = websocket.WebSocketApp("ws://127.0.0.1:8888/ws?ip=%s&port=%s&mode=%s" % (ip, port, mode)
+            ws = websocket.WebSocketApp("ws://127.0.0.1:8888/ws?ip=%s&port=%s&node=%s" % (ip, port, node)
         Desc:
             [Node] ----------------> [Area] --------
                                                     ]
             [Node] <--------------------------------
         """
-        mode = self.get_argument('mode')
-        logger.warning('current mode [%s]' %  mode)
+        node = self.get_argument('node')
+        node = int(node)
+        logger.warning('Current Node [%s]' %  node)
         ip = self.get_argument('ip')
         port = self.get_argument("port")
         clients.append(self)
         client_handler_hash_connect[id(self)] = self
-        logger.warning("The mode is [%s]" % mode)
-        mode = int(mode)
-        if mode == -1:
-        # Normally mode
-            node_id = mmt.register(self, ip, port, mode=mode)
+
+        if node == -1:
+        # Normally node
+            node_id = mmt.register(self, ip, port, node=node)
             logger.warning("The node is is [%s]" % node_id)
-            response = {"command":"connect", "status":"ok", "mode":"normally","node":node_id}
+            response = {"command":"connect", "status":"ok", "node":"normally","node":node_id}
             self.write_message(ujson.dumps(response))
         else:
             logger.warning("Recovery data ....")
-            node_id = mmt.register(self, ip, port, mode=mode)
-            response = {"command":"connect", "status":"ok", "mode":"recovery"}
+            node_id = mmt.register(self, ip, port, node=node)
+            response = {"command":"recovery", "status":"ok"}
             self.write_message(ujson.dumps(response))
 
 

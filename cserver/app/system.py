@@ -77,7 +77,7 @@ class LocalSystem(RTCWebSocketClient, MachineManager):
         """
         ip = socket.gethostbyname(socket.gethostname())
         url_template = 'ws://127.0.0.1:%s/ws?ip=%s&port=%s' % (rsp, ip, port)
-        ws_url = url_template + "&mode=%s"
+        ws_url = url_template + "&node=%s"
         self.connect(ws_url, auto_reconnet=True, reconnet_interval=10)
 
 
