@@ -161,7 +161,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
 
 
     def on_message(self, msg):
-        print ' can i see this is', msg
+        logger.info('[Recv] %s' % msg)
         response = dc.render(msg, mmt, manager=manager)
         if response:
             self.write_message(response)

@@ -20,4 +20,6 @@ def reconnect(handler, data):
     data = handler.help_recovery()
     handler.send(data)
 
-
+@local_system.route("sync_all")
+def sync_all(handler, data):
+    logger.info("[Sync] data to room server")
