@@ -43,21 +43,24 @@ class JoinHandler(web.RequestHandler):
         uid = self.get_argument("uid")
         room = rs.check_in(uid)
         response = rs.landing(room, uid)
-        logger.info('landing response[%s]' % response)
         if response == -1:
             # rollback ...
             rs.check_out(uid)
-        # TODO let the delegate server know
-        # try ..except should be here ...
-        ip = response.get("ip")
-        port = response.get("port")
-        node = response.get("node")
-        machine = "%s-%s" % (ip, port)
-        client_handler = rs._machine_hash_connect[machine]
-        connect = client_handler_hash_connect[client_handler]
-        connect.write_message(ujson.dumps({"command": "check_in", "uid": uid, "room": room, "node": node}))
-        set_expire(uid)
-        self.write(ujson.dumps(response))
+            self.write({"command": "bad", "info": "No more seat!"})
+        else:
+            # self.make_response(response, room=room)
+            self.write(ujson.dumps(response))
+
+            # def make_response(self, response, room):
+            ip = response.get("ip")
+            port = response.get("port")
+            node = response.get("node")
+            uid = response.get("uid")
+            machine = "%s-%s" % (ip, port)
+            client_handler = rs._machine_hash_connect[machine]
+            connect = client_handler_hash_connect[client_handler]
+            connect.write_message(ujson.dumps({"command": "check_in", "uid": uid, "room": room, "node": node}))
+            set_expire(uid)
 
 
 class DashHandler(web.RequestHandler):
@@ -149,6 +152,6 @@ class WebSocketHandler(websocket.WebSocketHandler):
 
     def on_message(self, msg):
         logger.info('[Recv] from client server: %s' % msg)
-        response = rs.render(msg, rs, manager=rs)
+        response = rs.render(msg)
         if response:
             self.write_message(response)

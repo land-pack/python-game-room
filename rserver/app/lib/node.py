@@ -192,10 +192,10 @@ class NodeManager(BaseMachineHashNodeManager):
         else:
             return True
 
-    def landing(self, room, user):
+    def landing(self, room, uid):
         """
         @param room: room id
-        @param user: user id
+        @param uid: user id
         @return : node id, if no more node for use! return -1
         Usage:
             mmt.install_room(room, user)
@@ -215,10 +215,10 @@ class NodeManager(BaseMachineHashNodeManager):
             """
             node = self._room_hash_node[room]
             ip, port = self._node_hash_machine[node].split('-')
-            self._user_hash_node[user] = node
+            self._user_hash_node[uid] = node
             self._node_hash_user[node] = self._node_hash_user[node] + 1
             response = {"ip": ip, "port": port,
-                        "node": node, "room": room}
+                        "node": node, "room": room, "uid": uid}
             return response
 
         for node in self._node_hash_counter:
@@ -231,7 +231,7 @@ class NodeManager(BaseMachineHashNodeManager):
                 self._node_hash_counter[node] = self._node_hash_counter[node] + 1
                 self._node_hash_user[node] = self._node_hash_user[node] + 1
                 ip, port = self._node_hash_machine[node].split('-')
-                self._user_hash_node[user] = node
+                self._user_hash_node[uid] = node
                 response = {"ip": ip, "port": port,
                             "node": node, "room": room}
                 return response

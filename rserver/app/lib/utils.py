@@ -7,6 +7,12 @@ logger = logging.getLogger("rserver")
 
 r = redis.Redis(host='127.0.0.1', port=6379)
 
+ROOM_PREFIX_ = 'room_redis_prefix_'
+
+
+def rename_key(key):
+    return ROOM_PREFIX_ + key
+
 
 def set_expire(key, ex=10):
     if isinstance(key, dict):
@@ -37,17 +43,20 @@ def mark_connected(key):
         r.delete(key)
 
 
-def check_expire(manager):
+def check_expire(rs):
     remove_list = []
-    for uid in manager._user_pending_status_set:
+
+    for uid in rs._user_pending_status_set:
         if is_expire(uid):
             logger.warning("User [%s] has expired" % uid)
-            manager.check_out(uid)
+
             remove_list.append(uid)
 
     for uid in remove_list:
-        remove_list.remove(uid)
-        manager._user_pending_status_set.remove(uid)
+        # remove_list.remove(uid)
+        rs._user_pending_status_set.remove(uid)
+        rs.check_out(uid)
+        # logger.error("Debug>>pending .. ==%s" % rs._user_pending_status_set)
 
 
 if __name__ == '__main__':

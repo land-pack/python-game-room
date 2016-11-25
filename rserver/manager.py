@@ -9,13 +9,6 @@ from app.lib import color
 from app.lib.utils import check_expire
 from app.views import rs
 
-"""
-from app.views import rs
-....
-...
-check_expire(manager)
-"""
-
 logging.config.fileConfig("log.conf")
 logger = logging.getLogger("rserver")
 define(name="port", default=8888, help="default port", type=int)

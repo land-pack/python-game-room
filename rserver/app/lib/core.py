@@ -15,11 +15,11 @@ class DispatchCommand(object):
 
         return _route
 
-    def render(self, message, mmt, manager=None):
+    def render(self, message):
         data = ujson.loads(message)
         command = data.get("command")
         if command in self._command_hash_views:
-            data = self._command_hash_views[command](data, mmt, manager)
+            data = self._command_hash_views[command](data)
         else:
             data = {"command": "nothing"}
         if data:
