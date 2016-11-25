@@ -7,6 +7,7 @@ from machine import MachineManager
 
 logger = logging.getLogger("cserver")
 
+
 class LocalSystem(RTCWebSocketClient, MachineManager):
     """
     LocalSystem
@@ -14,7 +15,6 @@ class LocalSystem(RTCWebSocketClient, MachineManager):
     2, Machine / Basic data manager!
     """
     _command_hash_views = {}
-
 
     def route(self, command):
         """

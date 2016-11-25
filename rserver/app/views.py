@@ -14,14 +14,10 @@ from lib.utils import set_expire, is_expire
 from lib.views import dc
 from lib.utils import check_expire
 
-
-
 logger = logging.getLogger("rserver")
 
-
-
 mmt = NodeManager()
-manager = RoomManager(prefix='')
+manager = RoomManager()
 clients = []
 client_handler_hash_connect = {}
 
@@ -48,7 +44,7 @@ class JoinHandler(web.RequestHandler):
                 "room": "1",
             }
         """
-        
+
         uid = self.get_argument("uid")
         room = manager.check_in(uid)
         response = mmt.landing(room, uid)
@@ -56,7 +52,7 @@ class JoinHandler(web.RequestHandler):
         if response == -1:
             # rollback ...
             manager.check_out(uid)
-        #TODO let the delegate server know
+        # TODO let the delegate server know
         # try ..except should be here ...
         ip = response.get("ip")
         port = response.get("port")
@@ -64,7 +60,7 @@ class JoinHandler(web.RequestHandler):
         machine = "%s-%s" % (ip, port)
         client_handler = mmt._machine_hash_connect[machine]
         connect = client_handler_hash_connect[client_handler]
-        connect.write_message(ujson.dumps({"command":"check_in", "uid":uid, "room":room, "node":node}))
+        connect.write_message(ujson.dumps({"command": "check_in", "uid": uid, "room": room, "node": node}))
         set_expire(uid)
         self.write(ujson.dumps(response))
 
@@ -89,7 +85,7 @@ class DashHandler(web.RequestHandler):
                 lines.append(root3)
                 uids = manager._room_hash_user_set[room]
                 for uid in uids:
-                    output='Manager.node_%s.room_%s.uid_%s' % (node, room, uid)
+                    output = 'Manager.node_%s.room_%s.uid_%s' % (node, room, uid)
                     lines.append(output)
         with open("./app/templates/data.csv", "w+") as fd:
             for line in lines:
@@ -105,8 +101,8 @@ class CSVHandler(web.RequestHandler):
 
 class MonitorHandler(web.RequestHandler):
     def get(self):
-        mmt.status()
-        manager.status()
+        mmt.node_status()
+        manager.room_status()
         self.write("ok")
 
 
@@ -114,7 +110,6 @@ class WebSocketHandler(websocket.WebSocketHandler):
     def check_origin(self, origin):
         return True
 
-    
     def open(self):
         """
         @param ip: node server ip
@@ -134,31 +129,28 @@ class WebSocketHandler(websocket.WebSocketHandler):
         """
         node = self.get_argument('node')
         node = int(node)
-        logger.warning('Current Node [%s]' %  node)
+        logger.warning('Current Node [%s]' % node)
         ip = self.get_argument('ip')
         port = self.get_argument("port")
         clients.append(self)
         client_handler_hash_connect[id(self)] = self
 
         if node == -1:
-        # Normally node
+            # Normally node
             node_id = mmt.register(self, ip, port, node=node)
             logger.warning("The node is is [%s]" % node_id)
-            response = {"command":"connect", "status":"ok", "node":"normally","node":node_id}
+            response = {"command": "connect", "status": "ok", "node": "normally", "node": node_id}
             self.write_message(ujson.dumps(response))
         else:
             logger.warning("Recovery data ....")
             node_id = mmt.register(self, ip, port, node=node)
-            response = {"command":"recovery", "status":"ok"}
+            response = {"command": "recovery", "status": "ok"}
             self.write_message(ujson.dumps(response))
-
-
 
     def on_close(self):
         mmt.unregister(self)
         clients.remove(self)
         del client_handler_hash_connect[id(self)]
-
 
     def on_message(self, msg):
         logger.info('[Recv] from client server: %s' % msg)

@@ -70,11 +70,19 @@ class BaseMachineHashNodeManager(object):
     """
     _node_index = 0
 
-
-    def __init__(self, rooms=2, users=32):
-        self._node_max_size = rooms
-        self._node_max_user_number = users
-
+    """
+    @property _node_max_size
+    When you use this class, you should configure it!
+    default value are given!
+    """
+    _node_max_size = 32
+    """
+    @property _node_max_user_number
+    One node can hold the number of user!
+    default value are given! assume if each room
+    can hold 10 user! so we have 320 on each node!
+    """
+    _node_max_user_number = 320
 
     def register(self, connect, ip, port, node=-1):
         """
@@ -94,8 +102,8 @@ class BaseMachineHashNodeManager(object):
             This node has already register to the server
             so ignore this register instead mark it as alive!
             """
-            self._connect_hash_machine[id(connect)] = key   # recreate ...
-            self._machine_hash_connect[key] = id(connect)   # update ...
+            self._connect_hash_machine[id(connect)] = key  # recreate ...
+            self._machine_hash_connect[key] = id(connect)  # update ...
             node_id = self._machine_hash_node[key]
             return node_id
 
@@ -108,14 +116,13 @@ class BaseMachineHashNodeManager(object):
             self._node_hash_room[node_id] = []
             self._connect_hash_machine[id(connect)] = key
             self._machine_hash_connect[key] = id(connect)
-            self._node_hash_machine[node_id]=key
-            self._node_hash_counter[node_id]= 0    # 0 room number!
-            self._node_hash_user[node_id]= 0    # 0 user number!
+            self._node_hash_machine[node_id] = key
+            self._node_hash_counter[node_id] = 0  # 0 room number!
+            self._node_hash_user[node_id] = 0  # 0 user number!
             if node == -1:
                 self._node_index = self._node_index + 1
             return node_id
-    
-    
+
     def unregister(self, connect):
         """
         @param connect: websocket connect
@@ -134,7 +141,6 @@ class BaseMachineHashNodeManager(object):
 
 
 class NodeManager(BaseMachineHashNodeManager):
-
     """
     @property _user_hash_node
     Example:
@@ -162,7 +168,6 @@ class NodeManager(BaseMachineHashNodeManager):
     """
     _node_hash_user = {}
 
-
     def is_running(self, node):
         """
         @param node: node id
@@ -175,7 +180,6 @@ class NodeManager(BaseMachineHashNodeManager):
                 return True
         return False
 
-
     def is_user_fillout_node(self, node):
         """
         @param node: node id
@@ -187,7 +191,6 @@ class NodeManager(BaseMachineHashNodeManager):
             return False
         else:
             return True
-
 
     def landing(self, room, user):
         """
@@ -212,10 +215,10 @@ class NodeManager(BaseMachineHashNodeManager):
             """
             node = self._room_hash_node[room]
             ip, port = self._node_hash_machine[node].split('-')
-            self._user_hash_node[user]=node
+            self._user_hash_node[user] = node
             self._node_hash_user[node] = self._node_hash_user[node] + 1
-            response = {"ip":ip, "port":port,
-                        "node":node, "room":room}
+            response = {"ip": ip, "port": port,
+                        "node": node, "room": room}
             return response
 
         for node in self._node_hash_counter:
@@ -225,21 +228,19 @@ class NodeManager(BaseMachineHashNodeManager):
 
                 self._room_hash_node[room] = node
                 self._node_hash_room[node].append(room)
-                self._node_hash_counter[node] = self._node_hash_counter[node]+1
+                self._node_hash_counter[node] = self._node_hash_counter[node] + 1
                 self._node_hash_user[node] = self._node_hash_user[node] + 1
                 ip, port = self._node_hash_machine[node].split('-')
-                self._user_hash_node[user]=node
-                response = {"ip":ip, "port":port,
-                        "node":node, "room":room}
-                return response 
-
+                self._user_hash_node[user] = node
+                response = {"ip": ip, "port": port,
+                            "node": node, "room": room}
+                return response
 
     def flying(self, uid):
         node = self._user_hash_node[uid]
         self._node_hash_user[node] = self._node_hash_user[node] - 1
 
-
-    def recovery_data(self, data):
+    def recovery_node(self, data):
         """
         @param data: a dict-type
         Example:
@@ -257,50 +258,47 @@ class NodeManager(BaseMachineHashNodeManager):
         rooms = data.get("rooms")
         counter = data.get("counter")
         machine = data.get("machine")
-        
+
         self._node_hash_user[node] = user
         self._node_hash_counter[node] = counter
         for room in rooms:
             self._room_hash_node[room] = node
 
-        
-    def status(self):
+    def node_status(self):
         print '+' * 50
         print"_machine_hash_connect", self._machine_hash_connect
         print"_connect_hash_machine", self._connect_hash_machine
         print"_machine_hash_node", self._machine_hash_node
         print"_node_hash_room", self._node_hash_room
-        print"_room_hash_node",  self._room_hash_node
-        print"_node_hash_counter", self._node_hash_counter 
+        print"_room_hash_node", self._room_hash_node
+        print"_node_hash_counter", self._node_hash_counter
         print"_node_hash_user", self._node_hash_user
         print '+' * 50
 
 
-
 if __name__ == '__main__':
- 
-#   mmt = NodeManager()
-#    mmt.register('connect1', '127.0.0.1','9001')
-#    mmt.register('connect2', '127.0.0.1','9002')
-#    print mmt._machine_hash_connect 
-#    print mmt._connect_hash_machine
-#    print mmt._machine_hash_node
-#    print mmt._node_hash_room
-#    print mmt._room_hash_node 
-#    print 'test unregister'
-#    mmt.unregister('connect2')
-#    mmt.register('connect2a', '127.0.0.1','9002')
-#    print mmt._node_hash_room
-    #=====================recovery test
+    #   mmt = NodeManager()
+    #    mmt.register('connect1', '127.0.0.1','9001')
+    #    mmt.register('connect2', '127.0.0.1','9002')
+    #    print mmt._machine_hash_connect
+    #    print mmt._connect_hash_machine
+    #    print mmt._machine_hash_node
+    #    print mmt._node_hash_room
+    #    print mmt._room_hash_node
+    #    print 'test unregister'
+    #    mmt.unregister('connect2')
+    #    mmt.register('connect2a', '127.0.0.1','9002')
+    #    print mmt._node_hash_room
+    # =====================recovery test
     empty = NodeManager()
-    empty.register('connect1', '127.0.0.1','9002', node=2)
-    #empty.recovery_connect('connect1a', '127.0.0.1','9002')
+    empty.register('connect1', '127.0.0.1', '9002', node=2)
+    # empty.recovery_connect('connect1a', '127.0.0.1','9002')
     sample_data = {
-                    'node': 2,                      # Node id
-                    'user': 18,                     # user number
-                    'rooms': ['r1', 'r2', 'r3'],    # room set
-                    'counter': 8,                  # the total room in node
-                    'machine':'127.0.0.1-9002'      # machine id
-                }
-    empty.recovery_data(sample_data)
-    empty.status()
+        'node': 2,  # Node id
+        'user': 18,  # user number
+        'rooms': ['r1', 'r2', 'r3'],  # room set
+        'counter': 8,  # the total room in node
+        'machine': '127.0.0.1-9002'  # machine id
+    }
+    empty.recovery_node(sample_data)
+    empty.node_status()

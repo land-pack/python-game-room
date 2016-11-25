@@ -1,9 +1,10 @@
 import logging
 from system import LocalSystem
+
 local_system = LocalSystem()
 
-
 logger = logging.getLogger("cserver")
+
 
 @local_system.route("connect")
 def connect(handler, data):
@@ -18,6 +19,7 @@ def connect(handler, data):
 def recovery(handler, data):
     data = handler.help_recovery()
     handler.send(data)
+
 
 @local_system.route("sync_all")
 def sync_all(handler, data):

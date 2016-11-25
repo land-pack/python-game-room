@@ -1,7 +1,5 @@
 import time
 import logging
-import functools
-import json
 import ujson
 from tornado import gen
 from tornado import httpclient

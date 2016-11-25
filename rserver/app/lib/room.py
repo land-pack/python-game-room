@@ -68,8 +68,11 @@ class _BaseRoomManager(object):
     Example:    2
     """
     _user_counter = 0
-    
-    def __init__(self, size=3, rooms=3, prefix=''):
+
+    def __init__(self):
+        self.config_room()
+
+    def config_room(self, size=30, rooms=300, prefix=''):
         """
         @param size: The size of each room, 
         @param num: The number of room
@@ -78,12 +81,11 @@ class _BaseRoomManager(object):
         #: self.size = size -1
         self.size = size - 1
         self.room_size = self.size + 1
-        self._lack_level_hash_room_set = { i:[]  for i in range(1, self.size + 2) }
+        self._lack_level_hash_room_set = {i: [] for i in range(1, self.size + 2)}
         self._lack_level_set = xrange(size + 1)
         self._max_lack_level = size
         self.prefix = prefix
         self.rooms = rooms
-
 
     def get_fragmentary(self):
         """
@@ -96,7 +98,6 @@ class _BaseRoomManager(object):
                 room_name = self.select_room_name(_lack_level)
                 return room_name
         return None
-
 
     def select_room_name(self, _lack_level):
         """
@@ -116,8 +117,8 @@ class _BaseRoomManager(object):
             room_name = self._lack_level_hash_room_set.get(_lack_level).pop()
             del self._room_hash_lack_level[room_name]
             return room_name
-        
-        
+
+
         elif _lack_level > 1 and _lack_level <= self._max_lack_level:
             """
             if this `_lack_level` range between 1 to self._max_lack_level
@@ -126,11 +127,10 @@ class _BaseRoomManager(object):
             room_name = self._lack_level_hash_room_set.get(_lack_level).pop()
             new_lack = _lack_level - 1
             self._lack_level_hash_room_set[new_lack].append(room_name)
-            self._room_hash_lack_level[room_name]=new_lack
+            self._room_hash_lack_level[room_name] = new_lack
             return room_name
         else:
             return None
-        
 
     def generate_room_name(self, subfix=''):
         """
@@ -140,11 +140,14 @@ class _BaseRoomManager(object):
         """
         prefix = self.prefix
         _room_counter = self._room_counter
-        return '%s%s%s' % ( prefix, _room_counter, subfix)
+        return '%s%s%s' % (prefix, _room_counter, subfix)
 
-    
     def new_room(self, uid):
         """
+        if there no more fragmentary room, this method will be called!
+        you just get a uid! and the system will return a room id to you!
+        when the current room are fill out! will generate a new room id
+        for you! you next step is take your room-id to your node server!
         @param room_name: a string type, 
         Example:    'room1'
         @param uid: a string or a number set!
@@ -153,7 +156,6 @@ class _BaseRoomManager(object):
         """
 
         if self._room_hash_user_set == {}:
-
             self._room_counter = 0
             self._user_counter = 0
 
@@ -174,7 +176,6 @@ class _BaseRoomManager(object):
             self._room_hash_user_set[room_name] = [uid, ]
             self._user_counter = self._user_counter + 1
         self._user_hash_room[uid] = room_name
-    
 
     def clean(self, room_name):
         """
@@ -187,17 +188,18 @@ class _BaseRoomManager(object):
             self._lack_level_hash_room_set[old_level].remove(room_name)
             new_level = old_level + 1
             self._lack_level_hash_room_set[new_level].append(room_name)
-            self._room_hash_lack_level[room_name]=new_level
+            self._room_hash_lack_level[room_name] = new_level
         else:
             length = len(self._room_hash_user_set[room_name])
             lack_level = self.room_size - length
             self._lack_level_hash_room_set[lack_level].append(room_name)
-            self._room_hash_lack_level[room_name]=lack_level
+            self._room_hash_lack_level[room_name] = lack_level
 
-
-    
     def check_in(self, uid):
         """
+        when a user come in, we do first step is check_in!
+        if we have fragmentary room, we will take she/he there
+        and then release that room lock!
         @param uid: user id
         @return : room id 
         """
@@ -208,12 +210,9 @@ class _BaseRoomManager(object):
             self._user_hash_room[uid] = room_name
             self._user_counter = self._user_counter + 1
         else:
-            # get new room
             self.new_room(uid)
         self._user_pending_status_set.add(uid)
         return self._user_hash_room[uid]
-    
-    
 
     def check_out(self, uid):
         try:
@@ -230,8 +229,7 @@ class _BaseRoomManager(object):
 
 
 class RoomManager(_BaseRoomManager):
-
-    def recovery(self, data):
+    def recovery_room(self, data):
         """
         self._room_hash_user_set = {"room1": ["user1", "user2"],"room2":[...]}
         self._user_hash_room = {"user1": "room1", "user1":"room1", "user2":"room2}
@@ -242,71 +240,75 @@ class RoomManager(_BaseRoomManager):
         """
         pass
 
+    def room_status(self):
+        """
+        Just simply output something about this class instance status!
+        Returns: None
 
-    def status(self):
+        """
         print '+' * 50
-        print '_room_hash_user_set:',    self._room_hash_user_set
-        print '_user_hash_room',    self._user_hash_room
-        print '_room_hash_lack_level',     self._room_hash_lack_level
+        print '_room_hash_user_set:', self._room_hash_user_set
+        print '_user_hash_room', self._user_hash_room
+        print '_room_hash_lack_level', self._room_hash_lack_level
         print '_lack_level_hash_room_set', self._lack_level_hash_room_set
-        print '+' * 50 
-
+        print '+' * 50
 
 
 if __name__ == '__main__':
     print "manager = RoomManager(size=3, prefix='room_')"
-    manager = RoomManager(size=3, rooms=3, prefix='room_')
+    manager = RoomManager()
+    manager.config_room(size=10, rooms=3, prefix='room_')
     print "manager.check_in(12)"
     manager.check_in(12)
-    manager.status()
-    print '='*50
+    manager.room_status()
+    print '=' * 50
     print ''
     print "manager.check_out(12)"
     manager.check_out(12)
-    manager.status()
-    print '='*50
+    manager.room_status()
+    print '=' * 50
     print ''
     print "manager.check_in(12)"
     manager.check_in(12)
     print "manager.check_in(13)"
     manager.check_in(13)
-    manager.status()
-    print '='*50
+    manager.room_status()
+    print '=' * 50
     print ''
     print "manager.check_out(12)"
     manager.check_out(12)
     print "manager.check_out(13)"
     manager.check_out(13)
-    manager.status()
+    manager.room_status()
 
-    print '='*50
+    print '=' * 50
     print ''
     print "check_in(0 ~ 9)"
     for i in range(10):
         manager.check_in(i)
-        manager.status()
-    manager.status()
-    
-    print '='*50
+        manager.room_status()
+    manager.room_status()
+
+    print '=' * 50
     print ''
     print "check_out(0 ~ 9)"
     for i in range(10):
         manager.check_out(i)
-        manager.status()
-    manager.status()
-    
-    print '='*50
+        manager.room_status()
+    manager.room_status()
+
+    print '=' * 50
     print ''
     print "check_in(0 ~ 9)"
     for i in range(10):
         manager.check_in(i)
-        manager.status()
-    manager.status()
-    
-    print '='*50
+        manager.room_status()
+    manager.room_status()
+
+    print '=' * 50
     print ''
     print "check_in(100 ~ 110)"
-    for i in range(100,110):
+    for i in range(100, 110):
         manager.check_in(i)
-        manager.status()
-    manager.status()
+        manager.room_status()
+    manager.room_status()

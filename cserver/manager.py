@@ -10,17 +10,14 @@ from tornado.options import options, define
 from app.views import local_system
 from app import color
 
-
 logging.config.fileConfig("log.conf")
 logger = logging.getLogger("cserver")
 
 define(name="port", default=9001, help="default port", type=int)
 define(name="cport", default=8888, help="default port", type=int)
 
-
 g_client_connect = []
 g_connect_hash_uid = {}
-
 
 """
 You have `local_system` , so you have it all!
@@ -43,11 +40,9 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
 
     _connect_hash_uid = {}
 
-
     def check_origin(self, origin):
         return True
 
-    
     def open(self):
         """
         Usage: The argument with url only for `nginx` identify it!
@@ -55,15 +50,11 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
             url="ws://127.0.0.1:8880/ws?ip=%s&port=%s&node=%s&room=%s&uid=%s" % (ip, port, node, room, uid)
             ws = websocket.WebSocketApp(url)
         """
-        ip = self.get_argument("ip")
-        port = self.get_argument("port")
-        node = self.get_argument("node")
         uid = self.get_argument("uid")
         room = self.get_argument("room")
         g_client_connect.append(self)
-        g_connect_hash_uid[id(self)]=uid
+        g_connect_hash_uid[id(self)] = uid
         local_system.check_in(self, room, uid)
-
 
     def on_close(self):
         """
@@ -80,12 +71,10 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
         g_client_connect.remove(self)
         del g_connect_hash_uid[id(self)]
 
-
-
     def on_message(self, msg):
-        #data = local_system.parser(msg)
-        #response = local_system.check_in(data)
-        #if response:
+        # data = local_system.parser(msg)
+        # response = local_system.check_in(data)
+        # if response:
         #    self.write_message(response)
         logger.info("[client] recv: %s" % msg)
 
@@ -93,7 +82,7 @@ class DelegateWebSocketHandler(websocket.WebSocketHandler):
 def main():
     application = web.Application([
         (r'/ws', DelegateWebSocketHandler),
-        ],
+    ],
         debug=True)
     options.parse_command_line()
     application.listen(options.port)
