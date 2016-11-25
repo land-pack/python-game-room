@@ -1,8 +1,9 @@
 import logging
-from core import DispatchCommand
 from utils import is_expire, mark_connected
 
-dc = DispatchCommand()
+from system import RoomServer
+
+rs = RoomServer()
 
 logger = logging.getLogger("rserver")
 
@@ -15,20 +16,20 @@ def ping(message):
 """
 
 
-@dc.route("ping")
+@rs.route("ping")
 def ping(message, mmt, manager):
     # print 'I should sync data when ping coming recv ', message
     return {"command": "sync_all"}
 
 
-@dc.route("ack_sync")
+@rs.route("ack_sync")
 def ack_sync(message, mmt, manager):
     # print 'recv ', message
     # return {"command": "ack", "info":"sync success"}
     pass
 
 
-@dc.route("ack_check_in")
+@rs.route("ack_check_in")
 def ack_check_in(message, mmt, manager):
     uid = message.get("uid")
     if uid in manager._user_pending_status_set:
@@ -39,7 +40,7 @@ def ack_check_in(message, mmt, manager):
         return {"command": "ack_check_in", "status": "bad"}
 
 
-@dc.route("ack_check_out")
+@rs.route("ack_check_out")
 def check_out(message, mmt, manager):
     uid = message.get("uid")
     if uid in manager._user_pending_status_set:
@@ -53,7 +54,7 @@ def check_out(message, mmt, manager):
         return {"command": "ack_check_out", "status": "bad", "info": "you may has already check out"}
 
 
-@dc.route("ack_recovery")
+@rs.route("ack_recovery")
 def ack_recovery(message, mmt, manager):
     mmt.recovery_room(message)
     return {"command": "ack_recovery", "status": "ok"}

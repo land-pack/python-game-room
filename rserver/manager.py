@@ -7,7 +7,7 @@ from tornado import ioloop
 from app.url import urls
 from app.lib import color
 from app.lib.utils import check_expire
-from app.views import manager
+from app.views import rs
 
 """
 from app.views import rs
@@ -29,5 +29,5 @@ if __name__ == '__main__':
 
     logger.info('Listen on %s' % options.port)
     application.listen(options.port)
-    ioloop.PeriodicCallback(lambda: check_expire(manager), 1000).start()
+    ioloop.PeriodicCallback(lambda: check_expire(rs), 1000).start()
     ioloop.IOLoop.instance().start()
