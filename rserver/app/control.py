@@ -1,10 +1,9 @@
 import logging
-from utils import is_expire, mark_connected
+from lib.utils import is_expire, mark_connected
+from lib.system import RoomServer
 
-from system import RoomServer
 
 rs = RoomServer()
-
 logger = logging.getLogger("rserver")
 
 """

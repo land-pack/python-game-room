@@ -1,3 +1,7 @@
+import ujson
+from utils import set_expire
+
+
 class BaseMachineHashNodeManager(object):
     """
     @property _machine_hash_node
@@ -51,6 +55,12 @@ class BaseMachineHashNodeManager(object):
     """
     _machine_hash_connect = {}
     """
+    @property _machine_hash_handler
+    The handler is a object of websocket connect
+    you can do the send/recv operations!
+    """
+    _machine_hash_handler = {}
+    """
     @property _node_hash_counter
     The counter of room in the node!
     After a new room append to this node
@@ -62,6 +72,7 @@ class BaseMachineHashNodeManager(object):
             { 3 : 0  }
             { 4 : 0  }
     """
+
     _node_hash_counter = {}
 
     """
@@ -104,6 +115,7 @@ class BaseMachineHashNodeManager(object):
             """
             self._connect_hash_machine[id(connect)] = key  # recreate ...
             self._machine_hash_connect[key] = id(connect)  # update ...
+            self._machine_hash_handler[key] = connect  # update
             node_id = self._machine_hash_node[key]
             return node_id
 
@@ -116,6 +128,7 @@ class BaseMachineHashNodeManager(object):
             self._node_hash_room[node_id] = []
             self._connect_hash_machine[id(connect)] = key
             self._machine_hash_connect[key] = id(connect)
+            self._machine_hash_handler[key] = connect
             self._node_hash_machine[node_id] = key
             self._node_hash_counter[node_id] = 0  # 0 room number!
             self._node_hash_user[node_id] = 0  # 0 user number!
@@ -263,6 +276,27 @@ class NodeManager(BaseMachineHashNodeManager):
         self._node_hash_counter[node] = counter
         for room in rooms:
             self._room_hash_node[room] = node
+
+    def notify(self, response):
+        """
+        if a new user has come in, the room server will send
+        a message to let that node know! someone coming soon!
+
+        Args:
+            response:
+
+        Returns:
+
+        """
+        ip = response.get("ip")
+        port = response.get("port")
+        node = response.get("node")
+        uid = response.get("uid")
+        room = response.get("room")
+        machine_name = "%s-%s" % (ip, port)
+        websocket_handler = self._machine_hash_handler[machine_name]
+        websocket_handler.write_message(ujson.dumps({"command": "check_in", "uid": uid, "room": room, "node": node}))
+        set_expire(uid)
 
     def node_status(self):
         print '+' * 50

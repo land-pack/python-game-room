@@ -1,15 +1,8 @@
-import os
-import json
-import datetime
-import logging
 import logging.config
 import ujson
 from tornado import web
-from tornado import ioloop
 from tornado import websocket
-from lib.utils import set_expire, is_expire
-from lib.views import rs
-from lib.utils import check_expire
+from control import rs
 
 logger = logging.getLogger("rserver")
 
@@ -48,19 +41,8 @@ class JoinHandler(web.RequestHandler):
             rs.check_out(uid)
             self.write({"command": "bad", "info": "No more seat!"})
         else:
-            # self.make_response(response, room=room)
             self.write(ujson.dumps(response))
-
-            # def make_response(self, response, room):
-            ip = response.get("ip")
-            port = response.get("port")
-            node = response.get("node")
-            uid = response.get("uid")
-            machine = "%s-%s" % (ip, port)
-            client_handler = rs._machine_hash_connect[machine]
-            connect = client_handler_hash_connect[client_handler]
-            connect.write_message(ujson.dumps({"command": "check_in", "uid": uid, "room": room, "node": node}))
-            set_expire(uid)
+            rs.notify(response)
 
 
 class DashHandler(web.RequestHandler):
