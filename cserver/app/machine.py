@@ -19,12 +19,17 @@ class MachineManager(object):
     To keep the _node_id, only be changed one time!
     """
     _set_node_flag = True
+    _set_machine_flag = True
 
     _room_hash_uid_set = {}
     _uid_hash_room = {}
     _handler_hash_connect = {}
     _handler_hash_uid = {}
     _uid_hash_handler = {}
+    _user_counter = 0
+    _room_counter = 0
+    _room_set = set()
+    _machine = '127.0.0.1-0000'
 
     def set_node(self, node):
         """
@@ -40,13 +45,10 @@ class MachineManager(object):
             self._node_id = node
             self._set_node_flag = False
 
-    def help_recovery(self):
-        """
-        Send all data room-server need, so that can recovery data!
-        Returns:
-
-        """
-        pass
+    def set_machine(self, machine):
+        if self._set_machine_flag:
+            self._machine = machine
+            self._set_machine_flag = False
 
     def check_in(self, connect, room, uid):
         self._handler_hash_connect[id(connect)] = connect
@@ -56,8 +58,11 @@ class MachineManager(object):
         if room in self._room_hash_uid_set:
             self._room_hash_uid_set[room].add(uid)
         else:
+            self._room_counter = self._room_counter + 1
+            self._room_set.add(room)
             self._room_hash_uid_set[room] = set()
             self._room_hash_uid_set[room].add(uid)
+        self._user_counter = self._user_counter + 1
         response = {"command": "ack_check_in", "uid": uid}
         self.send(response)
 
@@ -71,4 +76,27 @@ class MachineManager(object):
         del self._handler_hash_connect[handler]
         self._room_hash_uid_set[room].remove(uid)
         response = {"command": "ack_check_out", "uid": uid}
+        self._user_counter = self._user_counter - 1
         self.send(response)
+
+    def help_recovery(self):
+        """
+        Send all local data to room server to recovery it!
+        Returns:
+            {
+            "command": "ack_recovery",  # command
+            "node": 2,  # Node id
+            "user": 18,  # user number
+            "rooms": ["r1", "r2", "r3"],  # room set
+            "counter": 64,  # the total room in node
+            "machine": "127.0.0.1-9001"  # machine id
+        }
+        """
+        return {
+            "command": "ack_recovery",  # command
+            "node": self._node_id,  # Node id
+            "user": self._user_counter,  # user number
+            "rooms": self._room_set,  # room set
+            "counter": self._room_counter,  # the total room in node
+            "machine": self._machine  # machine id
+        }

@@ -10,7 +10,10 @@ logger = logging.getLogger("cserver")
 def connect(handler, data):
     logger.info("[Local] register sucess with node [%s]" % data.get("node"))
     node = data.get("node")
+    machine = data.get("machine")
+
     handler.set_node(node)
+    handler.set_machine(machine)
     response = {"command": " ack_connect"}
     handler.send(response)
 

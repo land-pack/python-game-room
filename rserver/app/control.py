@@ -2,7 +2,6 @@ import logging
 from lib.utils import is_expire, mark_connected
 from lib.system import RoomServer
 
-
 rs = RoomServer()
 logger = logging.getLogger("rserver")
 
@@ -55,5 +54,7 @@ def check_out(message):
 
 @rs.route("ack_recovery")
 def ack_recovery(message):
-    rs.recovery_room(message)
+    # rs.recovery_room(message)
+    print 'message', message
+    logger.error("The recovery data from client side>>%s" % message)
     return {"command": "ack_recovery", "status": "ok"}

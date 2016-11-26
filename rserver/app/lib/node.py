@@ -95,7 +95,7 @@ class BaseMachineHashNodeManager(object):
     """
     _node_max_user_number = 320
 
-    def register(self, connect, ip, port, node=-1):
+    def register(self, connect, ip, port, node=None):
         """
         @param ip: proxy server ip
         @param port: proxy server port
@@ -151,6 +151,30 @@ class BaseMachineHashNodeManager(object):
             [Node123] -----> [127.0.0.1:90001]
         """
         del self._connect_hash_machine[id(connect)]
+
+    def recovery_node(self, data):
+        """
+        @param data: a dict-type
+        Example:
+                {
+                    "command": "ack_recovery",      # command
+                    'node': 2,                      # Node id
+                    'user': 18,                     # user number
+                    'rooms': [r1, r2, r3]           # room set
+                    'counter': 64,                  # the total room in node
+                    'machine':'127.0.0.1-9001'      # machine id
+                }
+        """
+        node = data.get("node")
+        user = data.get("user")
+        rooms = data.get("rooms")
+        counter = data.get("counter")
+        machine = data.get("machine")
+
+        self._node_hash_user[node] = user
+        self._node_hash_counter[node] = counter
+        for room in rooms:
+            self._room_hash_node[room] = node
 
 
 class NodeManager(BaseMachineHashNodeManager):
@@ -252,30 +276,6 @@ class NodeManager(BaseMachineHashNodeManager):
     def flying(self, uid):
         node = self._user_hash_node[uid]
         self._node_hash_user[node] = self._node_hash_user[node] - 1
-
-    def recovery_node(self, data):
-        """
-        @param data: a dict-type
-        Example:
-                {
-                    "command": "ack_recovery",      # command
-                    'node': 2,                      # Node id
-                    'user': 18,                     # user number
-                    'rooms': [r1, r2, r3]           # room set
-                    'counter': 64,                  # the total room in node
-                    'machine':'127.0.0.1-9001'      # machine id
-                }
-        """
-        node = data.get("node")
-        user = data.get("user")
-        rooms = data.get("rooms")
-        counter = data.get("counter")
-        machine = data.get("machine")
-
-        self._node_hash_user[node] = user
-        self._node_hash_counter[node] = counter
-        for room in rooms:
-            self._room_hash_node[room] = node
 
     def notify(self, response):
         """

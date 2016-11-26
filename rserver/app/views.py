@@ -112,18 +112,19 @@ class WebSocketHandler(websocket.WebSocketHandler):
         logger.warning('Current Node [%s]' % node)
         ip = self.get_argument('ip')
         port = self.get_argument("port")
+        machine = "%s-%s" % (ip, port)
         clients.append(self)
         client_handler_hash_connect[id(self)] = self
 
         if node == -1:
             # Normally node
             node_id = rs.register(self, ip, port, node=node)
-            logger.warning("The node is is [%s]" % node_id)
-            response = {"command": "connect", "status": "ok", "node": "normally", "node": node_id}
+            logger.warning("Register success! with node [%s]" % node_id)
+            response = {"command": "connect", "status": "ok", "node": node_id, "machine": machine}
             self.write_message(ujson.dumps(response))
         else:
-            logger.warning("Recovery data ....")
-            node_id = rs.register(self, ip, port, node=node)
+            logger.warning("Recovery node data ....")
+            rs.register(self, ip, port, node=node)
             response = {"command": "recovery", "status": "ok"}
             self.write_message(ujson.dumps(response))
 
