@@ -54,7 +54,7 @@ def check_out(message):
 
 @rs.route("ack_recovery")
 def ack_recovery(message):
-    # rs.recovery_room(message)
-    print 'message', message
+    # rs.recovery(message)
+    rs.recovery_node(message)
     logger.error("The recovery data from client side>>%s" % message)
     return {"command": "ack_recovery", "status": "ok"}

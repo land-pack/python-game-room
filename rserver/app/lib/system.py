@@ -23,6 +23,7 @@ class RoomServer(RoomManager, NodeManager, DispatchCommand):
     def __init__(self, node_max_room=32, node_max_user=320, room_size=10):
         self._node_max_size = node_max_room
         self._node_max_user_number = node_max_user
+        self._room_max_size = room_size
         self.config_room(size=room_size)
 
 

@@ -18,7 +18,8 @@ if __name__ == '__main__':
     application = web.Application(
         urls,
         debug=True,
-        template_path=os.path.join(os.path.dirname(__name__), 'app/templates'))
+        template_path=os.path.join(os.path.dirname(__name__), 'app/templates'),
+        static_path=os.path.join(os.path.dirname(__name__), 'app/static'))
 
     logger.info('Listen on %s' % options.port)
     application.listen(options.port)

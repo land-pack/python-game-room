@@ -16,7 +16,7 @@ class MachineManager(object):
     _node_id = -1
 
     """
-    To keep the _node_id, only be changed one time!
+    To keep the _node_id, only be changed at the first time!
     """
     _set_node_flag = True
     _set_machine_flag = True
@@ -29,7 +29,20 @@ class MachineManager(object):
     _user_counter = 0
     _room_counter = 0
     _room_set = set()
+    """
+    @property _machine
+    The machine id by host and port split by `-`
+    it's should id by self also can from the room-server!
+    """
     _machine = '127.0.0.1-0000'
+    """
+    @property _room_max_size
+    The max size if the game room!
+    This value should always be the same with `room-server`
+    should when the connect has success! the room-server should
+    let the local machine know that value!
+    """
+    _room_max_size = 8
 
     def set_node(self, node):
         """
@@ -58,11 +71,11 @@ class MachineManager(object):
         if room in self._room_hash_uid_set:
             self._room_hash_uid_set[room].add(uid)
         else:
-            self._room_counter = self._room_counter + 1
+            self._room_counter += 1
             self._room_set.add(room)
             self._room_hash_uid_set[room] = set()
             self._room_hash_uid_set[room].add(uid)
-        self._user_counter = self._user_counter + 1
+        self._user_counter += 1
         response = {"command": "ack_check_in", "uid": uid}
         self.send(response)
 
@@ -76,7 +89,7 @@ class MachineManager(object):
         del self._handler_hash_connect[handler]
         self._room_hash_uid_set[room].remove(uid)
         response = {"command": "ack_check_out", "uid": uid}
-        self._user_counter = self._user_counter - 1
+        self._user_counter -= 1
         self.send(response)
 
     def help_recovery(self):
@@ -89,14 +102,27 @@ class MachineManager(object):
             "user": 18,  # user number
             "rooms": ["r1", "r2", "r3"],  # room set
             "counter": 64,  # the total room in node
-            "machine": "127.0.0.1-9001"  # machine id
-        }
-        """
+            "machine": "127.0.0.1-9001",  # machine id
+
+            "room_hash_user_set" : {"room1": ["user1", "user2"],"room2":[...]},
+             "user_hash_room" : {"user1": "room1", "user1":"room1", "user2":"room2},
+
+             //"room_hash_lack_level":{"room1": 1,"room2":2}
+             //self._room_counter = 4
+             //self._user_counter = 8
+             @1 you can't according the total of each node roo_counter to get that value
+             because, that result maybe less than the actually value!
+             @2 you can't according the currently max-room-id to get the that value too.
+             cause ,we no sure every-node restart success ~~when the room-server die~
+             maybe die too~~
+             """
         return {
             "command": "ack_recovery",  # command
             "node": self._node_id,  # Node id
             "user": self._user_counter,  # user number
             "rooms": self._room_set,  # room set
             "counter": self._room_counter,  # the total room in node
-            "machine": self._machine  # machine id
+            "machine": self._machine,  # machine id
+            "room_hash_uid_set": self._room_hash_uid_set,
+            "uid_hash_room": self._uid_hash_room,
         }

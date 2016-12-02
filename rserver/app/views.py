@@ -33,6 +33,7 @@ class JoinHandler(web.RequestHandler):
             }
         """
 
+        data = {}
         uid = self.get_argument("uid")
         room = rs.check_in(uid)
         response = rs.landing(room, uid)
@@ -41,7 +42,9 @@ class JoinHandler(web.RequestHandler):
             rs.check_out(uid)
             self.write({"command": "bad", "info": "No more seat!"})
         else:
-            self.write(ujson.dumps(response))
+            data["body"] = response
+            data["status"] = 100
+            self.write(ujson.dumps(data))
             rs.notify(response)
 
 

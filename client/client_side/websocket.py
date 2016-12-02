@@ -109,8 +109,8 @@ class WebSocketClient(object):
 class RTCWebSocketClient(WebSocketClient):
     msg = {'command': 'msg', 'from': 'Frank ak',
            'to': 'Peter', 'body': 'Hello, Peter'}
-    hb_msg = {'command': 'ping'}  # hearbeat
-
+    #hb_msg = {'command': 'ping'}  # hearbeat
+    hb_msg = 'x'
     message = ''
 
     heartbeat_interval = 3
@@ -152,7 +152,8 @@ class RTCWebSocketClient(WebSocketClient):
        #     self.node_id= data.get("node_id")
        # else:
        #     print 'From Center>>>', msg
-        self.dispatch(self, msg)
+       # self.dispatch(self, msg)
+        print msg.decode('utf8')
 
     def on_connection_success(self):
         print('Connected!')

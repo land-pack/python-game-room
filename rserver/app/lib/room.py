@@ -118,7 +118,6 @@ class _BaseRoomManager(object):
             del self._room_hash_lack_level[room_name]
             return room_name
 
-
         elif _lack_level > 1 and _lack_level <= self._max_lack_level:
             """
             if this `_lack_level` range between 1 to self._max_lack_level
