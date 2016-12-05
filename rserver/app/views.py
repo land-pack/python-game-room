@@ -43,7 +43,7 @@ class JoinHandler(web.RequestHandler):
             self.write({"command": "bad", "info": "No more seat!"})
         else:
             data["body"] = response
-            data["status"] = 100
+            data["status"] = "100"
             self.write(ujson.dumps(data))
             rs.notify(response)
 

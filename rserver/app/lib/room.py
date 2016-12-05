@@ -228,8 +228,92 @@ class _BaseRoomManager(object):
 
 
 class RoomManager(_BaseRoomManager):
+    def _room2uid_to_uid2room(self, data):
+        """
+        Once we get the `room2uid` we will do something to generate another hash-table.
+        @param data: a dict-type
+        Example:
+            a = {
+            "room1": ["u1","u2", "u3"],
+            "room2": ["u4","u5", "u6"],
+            }
+
+        @return : a dict-type
+        After call this function! we get.
+            b = {
+                "u1":"room1",
+                "u2":"room1",
+                "u3":"room1",
+                "u4":"room2",
+                "u5":"room2",
+                "u6":"room2",
+            }
+
+        """
+        new = {}
+        for room in data:
+            uids = data.get(room)
+            for uid in uids:
+                new[uid] = room
+        return new
+
+    def _room2uid_to_room_lack_level(self, data):
+        """
+        Once we get the `room2uid` we will do something to generate another hash-table.
+        @param data: a dict-type
+        Example:
+            a = {
+            "room1": ["u1","u2", "u3"],
+            "room2": ["u4","u5", "u6"],
+            }
+
+        @return : a dict-type
+        After call this function! we get.
+            b = {
+                "room1":2,
+                 "room2":3,
+                 "room3":5,
+                 "room4":2,
+                 "room5":3,
+            }
+        """
+        new = {}
+        for room in data:
+            lack_level = self.room_size - len(data.get(room))
+            new[room] = lack_level
+        return new
+
+    def _lack_level_to_room(self, data):
+        """
+        Once we get the `room_to_lack_level`, we can go on ~
+        @param data: a dict-type
+        Example:
+            a = {
+                "room1":2,
+                 "room2":3,
+                 "room3":5,
+                 "room4":2,
+                 "room5":3,
+            }
+        @return : None
+        Will update this `_lack_level_hash_room_set` property!
+            b = {
+                1: [],
+                2: ["room1", "room4"],
+                3: ["room2", "room5"],
+                4: []
+                5:["room3",]
+            }
+        """
+        for room in data:
+            level = data.get(room)
+            self._lack_level_hash_room_set[level].append(room)
+
     def recovery_room(self, data):
         """
+        Help room server recovery!
+        There are several property will need to fill! but the client-server only
+        get us `room2uid`. and then you need to fill out the follow.
         self._room_hash_user_set = {"room1": ["user1", "user2"],"room2":[...]}
         self._user_hash_room = {"user1": "room1", "user1":"room1", "user2":"room2}
         self._room_hash_lack_level = {"room1": 1,"room2":2}
