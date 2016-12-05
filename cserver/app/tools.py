@@ -33,8 +33,12 @@ if __name__ == '__main__':
     print ttl.is_expire('jack')
     time.sleep(3)
     print ttl.is_expire('jack')
-    time.sleep(3)
+    time.sleep(1)
+    ttl.update('jack')
     print ttl.is_expire('jack')
+    time.sleep(4)
+    print ttl.is_expire('jack')
+    time.sleep(1)
     print ttl._key_hash_time
     ttl.remove_if_expire('jack')
     print ttl._key_hash_time
